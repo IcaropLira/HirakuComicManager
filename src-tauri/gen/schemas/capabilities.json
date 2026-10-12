@@ -1,1 +1,1 @@
-{"default":{"identifier":"default","description":"Permissões da janela principal","local":true,"windows":["main"],"permissions":["core:default","dialog:default"]}}
+{"default":{"identifier":"default","description":"Permissões da janela principal","local":true,"windows":["main"],"permissions":["core:default","dialog:default","updater:default","process:allow-restart"]}}

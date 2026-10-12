@@ -52,7 +52,7 @@ index cf1e464..2944267 100644
  ### Instalação
  
 diff --git a/src-tauri/Cargo.lock b/src-tauri/Cargo.lock
-index 30fd164..13a356f 100644
+index 30fd164..9c7f8d8 100644
 --- a/src-tauri/Cargo.lock
 +++ b/src-tauri/Cargo.lock
 @@ -47,6 +47,15 @@ version = "1.0.104"
@@ -704,7 +704,11 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "tendril"
  version = "0.5.1"
-@@ -3341,6 +3741,8 @@ dependencies = [
+@@ -3338,9 +3738,12 @@ version = "0.1.0"
+ dependencies = [
+  "base64 0.22.1",
+  "serde",
++ "serde_json",
   "tauri",
   "tauri-build",
   "tauri-plugin-dialog",
@@ -713,7 +717,7 @@ index 30fd164..13a356f 100644
  ]
  
  [[package]]
-@@ -3443,6 +3845,16 @@ dependencies = [
+@@ -3443,6 +3846,16 @@ dependencies = [
   "windows-sys 0.61.2",
  ]
  
@@ -730,7 +734,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "tokio-util"
  version = "0.7.20"
-@@ -3668,6 +4080,12 @@ version = "1.13.3"
+@@ -3668,6 +4081,12 @@ version = "1.13.3"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "c6f5d3c3b1bf09027a88a6bc961fc00497d651009560b5463668dc81b0fa87a8"
  
@@ -743,7 +747,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "url"
  version = "2.5.8"
-@@ -3922,6 +4340,15 @@ dependencies = [
+@@ -3922,6 +4341,15 @@ dependencies = [
   "system-deps",
  ]
  
@@ -759,7 +763,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "webview2-com"
  version = "0.39.1"
-@@ -4086,6 +4513,17 @@ dependencies = [
+@@ -4086,6 +4514,17 @@ dependencies = [
   "windows-link",
  ]
  
@@ -777,7 +781,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "windows-result"
  version = "0.4.1"
-@@ -4113,6 +4551,15 @@ dependencies = [
+@@ -4113,6 +4552,15 @@ dependencies = [
   "windows-targets 0.42.2",
  ]
  
@@ -793,7 +797,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "windows-sys"
  version = "0.60.2"
-@@ -4146,6 +4593,22 @@ dependencies = [
+@@ -4146,6 +4594,22 @@ dependencies = [
   "windows_x86_64_msvc 0.42.2",
  ]
  
@@ -816,7 +820,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "windows-targets"
  version = "0.53.5"
-@@ -4156,7 +4619,7 @@ dependencies = [
+@@ -4156,7 +4620,7 @@ dependencies = [
   "windows_aarch64_gnullvm 0.53.1",
   "windows_aarch64_msvc 0.53.1",
   "windows_i686_gnu 0.53.1",
@@ -825,7 +829,7 @@ index 30fd164..13a356f 100644
   "windows_i686_msvc 0.53.1",
   "windows_x86_64_gnu 0.53.1",
   "windows_x86_64_gnullvm 0.53.1",
-@@ -4187,6 +4650,12 @@ version = "0.42.2"
+@@ -4187,6 +4651,12 @@ version = "0.42.2"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "597a5118570b68bc08d8d59125332c54f1ba9d9adeedeef5b99b02ba2b0698f8"
  
@@ -838,7 +842,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "windows_aarch64_gnullvm"
  version = "0.53.1"
-@@ -4199,6 +4668,12 @@ version = "0.42.2"
+@@ -4199,6 +4669,12 @@ version = "0.42.2"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "e08e8864a60f06ef0d0ff4ba04124db8b0fb3be5776a5cd47641e942e58c4d43"
  
@@ -851,7 +855,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "windows_aarch64_msvc"
  version = "0.53.1"
-@@ -4211,12 +4686,24 @@ version = "0.42.2"
+@@ -4211,12 +4687,24 @@ version = "0.42.2"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "c61d927d8da41da96a81f029489353e68739737d3beca43145c8afec9a31a84f"
  
@@ -876,7 +880,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "windows_i686_gnullvm"
  version = "0.53.1"
-@@ -4229,6 +4716,12 @@ version = "0.42.2"
+@@ -4229,6 +4717,12 @@ version = "0.42.2"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "44d840b6ec649f480a41c8d80f9c65108b92d89345dd94027bfe06ac444d1060"
  
@@ -889,7 +893,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "windows_i686_msvc"
  version = "0.53.1"
-@@ -4241,6 +4734,12 @@ version = "0.42.2"
+@@ -4241,6 +4735,12 @@ version = "0.42.2"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "8de912b8b8feb55c064867cf047dda097f92d51efad5b491dfb98f6bbb70cb36"
  
@@ -902,7 +906,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "windows_x86_64_gnu"
  version = "0.53.1"
-@@ -4253,6 +4752,12 @@ version = "0.42.2"
+@@ -4253,6 +4753,12 @@ version = "0.42.2"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "26d41b46a36d453748aedef1486d5c7a85db22e56aff34643984ea85514e94a3"
  
@@ -915,7 +919,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "windows_x86_64_gnullvm"
  version = "0.53.1"
-@@ -4265,6 +4770,12 @@ version = "0.42.2"
+@@ -4265,6 +4771,12 @@ version = "0.42.2"
  source = "registry+https://github.com/rust-lang/crates.io-index"
  checksum = "9aec5da331524158c6d1a4ac0ab1541149c0b9505fde06423b02f5ef0106b9f0"
  
@@ -928,7 +932,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "windows_x86_64_msvc"
  version = "0.53.1"
-@@ -4329,7 +4840,7 @@ dependencies = [
+@@ -4329,7 +4841,7 @@ dependencies = [
   "gtk",
   "http",
   "javascriptcore-rs",
@@ -937,7 +941,7 @@ index 30fd164..13a356f 100644
   "libc",
   "ndk",
   "objc2",
-@@ -4376,6 +4887,16 @@ dependencies = [
+@@ -4376,6 +4888,16 @@ dependencies = [
   "pkg-config",
  ]
  
@@ -954,7 +958,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "yoke"
  version = "0.8.3"
-@@ -4420,6 +4941,12 @@ dependencies = [
+@@ -4420,6 +4942,12 @@ dependencies = [
   "synstructure",
  ]
  
@@ -967,7 +971,7 @@ index 30fd164..13a356f 100644
  [[package]]
  name = "zerotrie"
  version = "0.2.5"
-@@ -4453,6 +4980,18 @@ dependencies = [
+@@ -4453,6 +4981,18 @@ dependencies = [
   "syn 3.0.8",
  ]
  
@@ -987,16 +991,17 @@ index 30fd164..13a356f 100644
  name = "zlib-rs"
  version = "0.6.8"
 diff --git a/src-tauri/Cargo.toml b/src-tauri/Cargo.toml
-index 10f74c6..fc3fe60 100644
+index 10f74c6..f31f503 100644
 --- a/src-tauri/Cargo.toml
 +++ b/src-tauri/Cargo.toml
-@@ -9,5 +9,7 @@ tauri-build = { version = "2", features = [] }
+@@ -9,5 +9,8 @@ tauri-build = { version = "2", features = [] }
  [dependencies]
  tauri = { version = "2", features = [] }
  tauri-plugin-dialog = "2"
 +tauri-plugin-updater = "2"
 +tauri-plugin-process = "2"
  serde = { version = "1", features = ["derive"] }
++serde_json = "1"
  base64 = "0.22"
 diff --git a/src-tauri/capabilities/default.json b/src-tauri/capabilities/default.json
 index 87e0756..c653799 100644
