@@ -341,7 +341,7 @@ fn git_sync(root: String) -> Result<String, String> {
 // 2) Cole o Client ID abaixo (ele é público, não é segredo) ou defina HIRAKU_GITHUB_CLIENT_ID no build.
 const GITHUB_CLIENT_ID: &str = match option_env!("HIRAKU_GITHUB_CLIENT_ID") {
     Some(id) => id,
-    None => "COLE_AQUI_O_CLIENT_ID_DO_OAUTH_APP",
+    None => "Ov23lijr9wfVGkHJeXeb",
 };
 const GITHUB_WEB: &str = "https://github.com";
 const GITHUB_API: &str = "https://api.github.com";
