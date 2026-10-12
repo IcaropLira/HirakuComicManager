@@ -1,0 +1,6 @@
+{
+  "identifier": "default",
+  "description": "Permissões da janela principal",
+  "windows": ["main"],
+  "permissions": ["core:default", "dialog:default"]
+}

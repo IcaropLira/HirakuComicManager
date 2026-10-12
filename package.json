@@ -1,0 +1,12 @@
+{
+  "name": "terricola",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "postinstall": "node -e \"require('fs').copyFileSync('node_modules/d3/dist/d3.min.js','src/d3.min.js')\"",
+    "dev": "tauri dev",
+    "build": "tauri build"
+  },
+  "dependencies": { "d3": "^7.9.0" },
+  "devDependencies": { "@tauri-apps/cli": "^2" }
+}

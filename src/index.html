@@ -1,0 +1,971 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Terricola · Hiraku Comics Manager</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f3f1ee;--pn:#fff;--ink:#1c1b22;--mut:#716f7b;--ln:#dedbe4;--acc:#7a6db0;--edge:#8d8a9c;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15141a;--pn:#1d1c24;--ink:#ebe9f2;--mut:#9b98a8;--ln:#2e2c39;--acc:#a498cf;--edge:#6f6c80;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15141a;--pn:#1d1c24;--ink:#ebe9f2;--mut:#9b98a8;--ln:#2e2c39;--acc:#a498cf;--edge:#6f6c80;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.45 "Trebuchet MS","Segoe UI",system-ui,sans-serif}
+.app{display:grid;grid-template-columns:230px minmax(0,1fr) 250px;grid-template-rows:auto minmax(0,1fr) auto;height:100%}
+header{grid-column:1/-1;display:flex;gap:16px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--ln);flex-wrap:wrap}
+.app>aside,.app>#view{grid-row:2}
+.app-footer{grid-column:1/-1;grid-row:3;padding:5px 14px;border-top:1px solid var(--ln);color:var(--mut);font-size:11px;text-align:center}
+h1{font:700 17px Georgia,"Times New Roman",serif;margin:0;letter-spacing:.2px}
+.badge{font-size:12px;color:var(--mut);border:1px dashed var(--ln);padding:1px 8px;border-radius:10px}
+nav{display:flex;gap:4px;margin-left:auto}
+nav button{font:inherit;color:var(--mut);background:none;border:1px solid transparent;border-radius:6px;padding:5px 12px;cursor:pointer}
+nav button.on{color:var(--ink);background:var(--pn);border-color:var(--ln)}
+nav button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+aside{padding:14px;overflow:auto;border-right:1px solid var(--ln)}
+aside.r{border-right:0;border-left:1px solid var(--ln)}
+label{display:block;margin:0 0 12px;color:var(--mut);font-size:12px}
+label span{float:right;color:var(--ink)}
+select,input[type=range]{width:100%;margin-top:4px;font:inherit}
+select{background:var(--pn);color:var(--ink);color-scheme:inherit;border:1px solid var(--ln);border-radius:6px;padding:5px}
+input[type=range]{accent-color:var(--acc)}
+#view{overflow:auto;position:relative;min-height:0}
+svg{display:block}
+.empty,.mut{color:var(--mut)}.empty{padding:24px}
+.tag{display:inline-block;border:1px solid var(--ln);border-radius:10px;padding:0 8px;margin:2px 3px 2px 0;font-size:12px;background:var(--pn)}
+.tag.off,td.off,th.off{opacity:.3}
+.chip{cursor:pointer}.chip:hover{border-color:var(--acc)}
+h3{margin:0 0 2px;font:700 16px Georgia,serif}h5{margin:12px 0 4px;font-size:12px;color:var(--mut);font-weight:600}
+b.d{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.lg div{font-size:12px;margin:3px 0;color:var(--mut)}
+.sc{padding:12px}table{border-collapse:collapse;font-size:12px}
+th{font-weight:600;padding:2px 6px;text-align:center}th small{display:block;color:var(--mut);font-weight:400}
+td{border:1px solid var(--ln);height:24px;min-width:34px;text-align:center}
+td.nm{text-align:left;padding:0 10px;white-space:nowrap;cursor:pointer;background:var(--pn)}
+td.nm.on{outline:2px solid var(--acc);outline-offset:-2px}
+td i{display:inline-block;width:70%;height:12px;border-radius:3px}
+tr.sec td{border:0;background:none;text-align:left;padding-top:14px;color:var(--mut);font-weight:600;height:auto}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;padding:14px}
+.card{background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:12px}
+.card h4{margin:0;font:700 14px Georgia,serif}
+label.ck{display:flex;gap:6px;align-items:center;margin:3px 0;color:var(--ink);font-size:13px}
+.ty{margin-bottom:8px}.ty details{margin-left:22px;font-size:12px;color:var(--mut)}.ty summary{cursor:pointer}
+.ty button{font:inherit;font-size:11px;background:none;border:1px solid var(--ln);color:var(--mut);border-radius:8px;margin-right:4px;cursor:pointer}
+.tg{font:inherit;font-size:12px;color:var(--mut);background:none;border:1px solid var(--ln);border-radius:12px;padding:2px 10px;margin:2px;cursor:pointer}
+.tg.on,.tag.on{color:var(--ink);background:var(--pn);border-color:var(--acc)}
+.bar{padding:10px 14px;border-bottom:1px solid var(--ln)}
+.track{display:flex;gap:6px;overflow-x:auto;padding:22px 14px 10px;background:linear-gradient(var(--ln),var(--ln)) 0 36px/100% 2px no-repeat}
+.stop{flex:0 0 112px;text-align:center;cursor:pointer;padding:6px 4px;border-radius:8px;border:1px solid transparent;font-size:12px}
+.stop.on{background:var(--pn);border-color:var(--acc)}.stop b{display:block}.stop span{display:block;color:var(--mut)}
+.stop .dot{width:16px;height:16px;border-radius:50%;margin:0 auto 6px}
+.pg{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;padding:14px}
+.pc{background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:12px;animation:fi .25s}
+.pc h4{margin:0 0 6px;font:700 14px Georgia,serif}.pc div{margin:3px 0}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.pc{animation:none}}
+.vs{display:flex;gap:8px;flex-wrap:wrap;padding:8px 14px 0}
+.vc{border:1px solid var(--ln);border-left-width:5px;border-radius:6px;padding:6px 10px;background:var(--pn);font-size:12px}
+.ap{display:flex;gap:4px;flex-wrap:wrap}.ap div{width:50px;text-align:center;font-size:11px;border-radius:4px;padding:3px 0;border:1px solid var(--ln)}
+.rv{display:flex;gap:8px;align-items:center;padding:3px 0;border-bottom:1px solid var(--ln);font-size:12px}
+.rv .p{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rv small{color:var(--mut)}
+.rv select{width:auto;margin:0;font-size:12px}
+.es{margin:0 14px 12px}
+.es textarea,.es input,.es select{font:inherit;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--ln);border-radius:6px;padding:5px 8px;box-sizing:border-box;margin:0}
+.es textarea{width:100%;resize:vertical}.es select{width:auto}
+.eh{display:flex;gap:8px;margin-bottom:8px}.eh .ht{flex:1;font:700 15px Georgia,serif}
+.eg{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;margin-bottom:8px}
+.ef{display:grid;grid-template-columns:1fr auto;gap:4px;margin-bottom:6px}.ef input[data-ef=k]{font-weight:600;grid-column:1/-1}
+.ef.rl{grid-template-columns:1fr 140px auto}.ef.rl textarea{grid-column:1/-1}
+.ef.vr{display:flex;flex-wrap:wrap}.ef.vr input{width:auto;flex:1;min-width:110px}
+#htype{width:auto;margin:0 6px 0 10px}
+.hw{display:grid;grid-template-columns:240px minmax(0,1fr);height:calc(100vh - 190px);min-height:420px}
+.ho{overflow:auto;border-right:1px solid var(--ln);padding:10px 12px;font-size:12px}
+.hs{overflow:auto;height:100%;padding:18px 12px}
+.np{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100%;background:var(--bg)}
+.np-explorer{padding:14px 10px;border-right:1px solid var(--ln);background:var(--pn)}
+.np-explorer-head{display:flex;align-items:center;justify-content:space-between;padding:0 5px 10px}
+.np-explorer-head b{font:700 13px Georgia,serif}
+.np-search{width:100%;box-sizing:border-box;margin:0 0 8px;padding:6px 8px;border:1px solid var(--ln);border-radius:5px;background:var(--bg);color:var(--ink);font:inherit;font-size:12px}
+.np-row{display:flex;gap:2px;align-items:center;margin:2px 0 2px calc(var(--depth,0)*14px)}
+.np-row>button:first-child{display:flex;flex:1;min-width:0;gap:8px;align-items:center;padding:7px 6px;border:1px solid transparent;border-radius:5px;background:none;color:var(--ink);text-align:left;font:inherit;cursor:pointer}
+.np-row>button:first-child:hover,.np-row.active>button:first-child{background:var(--bg)}
+.np-row.active>button:first-child{border-color:var(--ln)}
+.np-icon{flex:none;color:var(--acc)}
+.np-label{min-width:0}.np-label b,.np-label small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.np-label b{font-size:12px;font-weight:600}.np-label small{margin-top:2px;color:var(--mut);font-size:10px}
+.np-delete{opacity:0;border:0;border-radius:4px;background:none;color:var(--mut);font-size:17px;cursor:pointer}.np-row:hover .np-delete,.np-delete:focus-visible{opacity:1}.np-delete:hover{color:#b0605c;background:var(--bg)}
+.np-document{min-width:0;padding:28px clamp(18px,5vw,72px) 60px;overflow:auto}
+.np-topline{display:flex;align-items:center;gap:8px;min-height:28px;color:var(--mut);font-size:11px}
+.np-status{margin-left:auto}
+.np-title{display:block;width:100%;max-width:820px;margin:28px auto 20px;padding:0;border:0;outline:0;background:transparent;color:var(--ink);font:700 34px/1.2 Georgia,serif}
+.np-title::placeholder{color:var(--mut)}
+.np-content{max-width:820px;margin:0 auto}
+.np-empty{max-width:540px;margin:18vh auto 0;text-align:center}.np-empty h2{font:700 24px Georgia,serif}.np-empty p{color:var(--mut)}
+.np-empty .tg{margin-top:8px}
+@media(max-width:700px){.np{grid-template-columns:minmax(0,1fr)}.np-explorer{border-right:0;border-bottom:1px solid var(--ln);max-height:230px;overflow:auto}.np-document{padding:22px 18px 42px}.np-title{font-size:28px;margin-top:22px}}
+.op{font-weight:600;margin-top:10px;cursor:pointer}.oq{margin-left:12px;color:var(--mut);cursor:pointer}.op:hover,.oq:hover{color:var(--ink)}
+.dt i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-left:3px}
+.sheet{max-width:780px;margin:0 auto;background:var(--pn);border:1px solid var(--ln);border-radius:4px;padding:22px 26px}
+.bk{display:grid;grid-template-columns:70px minmax(0,1fr);gap:8px;align-items:start;padding:2px 6px;margin:2px 0;border-radius:6px;border-left:3px solid transparent}
+.bk:focus-within{background:var(--bg);border-left-color:var(--acc)}
+.bk .lb{font-size:11px;color:var(--mut);padding-top:8px;text-align:right}
+.bk input,.bk textarea{font:13.5px/1.5 ui-monospace,"Courier New",monospace;color:var(--ink);background:transparent;border:0;outline:0;width:100%;resize:none;padding:4px 0;box-sizing:border-box;margin:0}
+.bk.pg{grid-template-columns:70px minmax(0,1fr);margin-top:28px;border-top:2px solid var(--ln);padding-top:10px}.bk.pg input{font:700 20px Georgia,serif}
+.bk.pn{grid-template-columns:70px minmax(0,1fr) auto;margin-top:14px}.bk.pn input{font:700 14px Georgia,serif}
+.bk.fl{grid-template-columns:70px 150px 120px minmax(0,1fr)}.bk.fl .who{font-weight:700;text-transform:uppercase}.bk.fl .who.bad{color:#b0707a}.bk.fl .par{font-style:italic;color:var(--mut)}
+.bk.leg textarea{font-style:italic}.bk.sfx textarea{font-weight:700;letter-spacing:1px}.bk.nota textarea,.bk.nota .lb{color:var(--mut)}.bk.nota{background:var(--bg)}
+.wc{font-size:11px;color:var(--mut);padding-top:8px}.wc.hi{color:#b0707a;font-weight:700}
+.hl p{margin:6px 0;font:14px/1.55 Georgia,serif}.lp{font:700 20px Georgia,serif;border-top:2px solid var(--ln);padding-top:12px;margin:26px 0 8px}.lq{margin-top:12px}
+.ld{margin:6px 0 6px 40px;font-size:13px}.ln{margin:6px 0;padding:4px 8px;background:var(--bg);color:var(--mut);font-size:12px;border-radius:4px}
+nav{flex-wrap:wrap;align-items:center;row-gap:4px}.ng{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut);margin:0 2px 0 14px}
+h1{cursor:pointer}
+.hp h5{margin:20px 18px 0;font-size:11px;text-transform:uppercase;letter-spacing:.08em}.hp>div:last-child{padding-bottom:18px}
+.hh{padding:28px 18px 4px}.hh h2{margin:0;font:700 32px Georgia,serif}
+.project-heading{display:flex;align-items:center;gap:8px}.project-heading .tg{opacity:.55}.project-heading:hover .tg,.project-heading .tg:focus-visible{opacity:1}.project-heading input{width:min(440px,70vw);font:700 32px Georgia,serif;color:var(--ink);background:var(--pn);border:1px solid var(--ln);border-radius:5px;padding:4px 8px}
+.hc{padding:14px}.hc:hover{border-color:var(--acc)}.hi2{font-size:20px;color:var(--acc)}.hc b{display:block;margin-top:4px}.hn{margin-top:6px;font-size:12px;color:var(--acc)}
+select,.es select,.rv select,#htype{appearance:none;-webkit-appearance:none;background-color:var(--pn);color:var(--ink);background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%238d8a9c' stroke-width='1.5'/></svg>");background-repeat:no-repeat;background-position:right 8px center;padding-right:26px;border:1px solid var(--ln);border-radius:6px}
+option{background-color:var(--pn);color:var(--ink);color-scheme:inherit}
+.app>aside:not(.r){grid-column:1}.app>aside.r{grid-column:3}.app>#view{grid-column:2}
+.app.nl>aside:not(.r),.app.nr>aside.r{display:none}
+.app.nl{grid-template-columns:0 minmax(0,1fr) 250px}.app.nr{grid-template-columns:230px minmax(0,1fr) 0}.app.nl.nr{grid-template-columns:0 minmax(0,1fr) 0}
+@media (max-width:820px){.app>aside:not(.r),.app>aside.r,.app>#view{grid-column:1}.app.nl,.app.nr,.app.nl.nr{grid-template-columns:1fr}}
+.be{padding:2px 0 2px 18px;min-height:36px}
+.nb{position:relative;display:flex;align-items:flex-start;gap:4px;padding:1px 0;border-radius:4px;border-top:2px solid transparent;border-bottom:2px solid transparent;transition:background .16s ease,box-shadow .16s ease,opacity .16s ease}.nb.dov,.nb.dov2{background:color-mix(in srgb,var(--acc) 10%,transparent);box-shadow:inset 3px 0 0 var(--acc)}.nb.dov{transform:translateY(3px)}.nb.dov2{transform:translateY(-3px)}
+.nb.dov:before,.nb.dov2:after{content:"";position:absolute;left:0;right:0;height:2px;background:var(--acc);pointer-events:none}.nb.dov:before{top:-4px}.nb.dov2:after{bottom:-4px}
+.nb.dragging{opacity:.3;transform:scale(.985)}.nb.dropped{animation:drop-pop .24s ease-out}
+@keyframes drop-pop{0%{background:color-mix(in srgb,var(--acc) 20%,transparent);transform:scale(.985)}100%{background:transparent;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.nb{transition:none}.nb.dropped{animation:none}}
+.nb .hd{flex:none;width:28px;min-height:32px;align-self:stretch;display:flex;align-items:center;justify-content:center;margin-left:-32px;padding:0 4px;box-sizing:border-box;border-radius:4px;color:var(--ink);opacity:.62;cursor:grab;font-size:14px;user-select:none;touch-action:none}.nb:hover .hd{opacity:1;background:color-mix(in srgb,var(--acc) 12%,transparent)}.nb .hd:active,.nb.dragging .hd{cursor:grabbing;background:color-mix(in srgb,var(--acc) 20%,transparent)}
+.nb .pre{flex:none;min-width:18px;padding-top:3px;color:var(--mut);text-align:center;user-select:none}.nb .tg2,.nb .ci{cursor:pointer}
+.nb .ed{flex:1;min-width:0;outline:0;padding:3px 2px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+.be.script-editor .t-pag,.be.script-editor .t-pan{align-items:center;padding:8px 4px}
+.be.script-editor .t-pag{margin-top:18px;border-top:1px solid var(--ln)}
+.be.script-editor .t-pag .ed{font:700 20px Georgia,serif}
+.be.script-editor .t-pan .ed{font:600 14px Georgia,serif}
+.be.script-editor .script-label{flex:none;width:82px;color:var(--mut);font-size:11px;text-align:right;padding-top:4px}
+.be.script-editor .t-fala{display:grid;grid-template-columns:minmax(100px,150px) minmax(80px,120px) minmax(0,1fr);align-items:start;gap:6px;padding:6px 4px}
+.be.script-editor .script-who,.be.script-editor .script-par{min-width:0;width:100%;box-sizing:border-box;border:0;border-bottom:1px solid var(--ln);outline:0;background:transparent;color:var(--ink);font:inherit;font-size:12px;padding:4px}
+.be.script-editor .script-who{font-weight:700;text-transform:uppercase}.be.script-editor .script-who.bad{color:#b0707a}.be.script-editor .script-par{font-style:italic;color:var(--mut)}
+.be.script-editor .t-fala .ed{padding:4px}
+.be.script-editor .script-count{flex:none;color:var(--mut);font-size:10px}
+.ed:empty:focus::before{content:attr(data-ph);color:var(--mut)}
+.script-editor .ed:empty:not(:focus)::before{content:attr(data-ph);color:var(--mut);opacity:.8}
+.t-h1 .ed{font:700 1.7em/1.3 Georgia,serif}.t-h2 .ed{font:700 1.35em/1.3 Georgia,serif}.t-h3 .ed{font:700 1.1em/1.3 Georgia,serif}
+.t-quote .ed{border-left:3px solid var(--ink);padding-left:12px}
+.t-callout{background:var(--bg);border-radius:6px;padding:6px 8px}
+.t-code .ed,.t-eq .ed{font:13px/1.5 ui-monospace,"Courier New",monospace;background:var(--bg);border-radius:6px;padding:8px 10px;white-space:pre}
+.t-div hr{flex:1;border:0;border-top:1px solid var(--ln);margin:12px 0}.t-todo .ck2{margin-top:6px}
+.bi{max-width:100%;border-radius:6px;margin:4px 0}
+.ed code{background:var(--bg);padding:1px 5px;border-radius:4px;font:0.9em ui-monospace,monospace;color:#b0605c}
+.wl{background:var(--bg);border:1px solid var(--ln);border-radius:4px;padding:0 5px;cursor:pointer;color:var(--acc)}
+#bm,#bt{position:fixed;z-index:60;background:var(--pn);border:1px solid var(--ln);border-radius:8px;box-shadow:0 8px 28px #0006;font-size:13px}
+#bm{padding:4px;min-width:210px;max-height:360px;overflow:auto}#bm .mi{padding:5px 10px;border-radius:5px;cursor:pointer;display:flex;gap:10px}#bm .mi span{width:22px;text-align:center;color:var(--mut)}#bm .mi.on,#bm .mi:hover{background:var(--bg)}
+#bm h6{margin:8px 8px 4px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--mut)}
+#bm .sw{display:inline-block;width:24px;height:24px;border-radius:5px;margin:2px;text-align:center;line-height:24px;cursor:pointer;border:1px solid var(--ln);font-size:12px}
+#bt{display:flex;gap:2px;padding:3px}#bt[hidden],#bm[hidden]{display:none}#bt button{font:inherit;color:var(--ink);background:none;border:0;border-radius:5px;padding:3px 8px;cursor:pointer}#bt button:hover{background:var(--bg)}
+@media (max-width:820px){.app{grid-template-columns:1fr;grid-template-rows:auto auto minmax(420px,1fr) auto auto;height:auto}.app-footer{grid-row:5}
+aside{border:0;border-bottom:1px solid var(--ln)}nav{margin-left:0}}
+</style></head><body>
+<div class="app">
+<header><h1 id="app-title">Terricola · Hiraku Comics Manager</h1><span class="badge">dados de exemplo</span><button id="th" class="tg">Claro/escuro</button><button id="sbt" class="tg" hidden>☰ Filtros</button><button id="dbt" class="tg" hidden>☷ Detalhes</button>
+<nav><button data-v="home">⌂ Home</button><span class="ng">Visualizar</span><button data-v="graph">Grafo</button><button data-v="matrix">Matriz</button><button data-v="chaps">Cartões</button><button data-v="timeline">Timeline</button><button data-v="ficha">Ficha</button><span class="ng">Escrever</span><button data-v="fichas">✎ Fichas</button><button data-v="tramas">✎ Tramas</button><button data-v="capitulos">✎ Capítulos</button><button data-v="roteiros">✎ Roteiros</button><button data-v="pages">▤ Páginas</button><span class="ng">Projeto</span><button data-v="vault">Vault</button><button data-v="git">⎇ Git</button></nav></header>
+<aside>
+<label>Série<select id="fs"></select></label>
+<label>Trama<select id="ft"></select></label>
+<label>Capítulo inicial<span id="la"></span><input id="fa" type="range" min="1" max="8" value="1"></label>
+<label>Capítulo final<span id="lb"></span><input id="fb" type="range" min="1" max="8" value="8"></label>
+
+<label>Contracenar em pelo menos<span id="lm"></span><input id="fm" type="range" min="1" max="4" value="1"></label>
+<div id="gf"></div>
+<div id="ga"><h5>Aparência do grafo</h5>
+<label>Tamanho dos nós<input id="ns" type="range" min="0.5" max="2" step="0.1" value="1"></label>
+<label>Espessura das linhas<input id="lt" type="range" min="0.5" max="3" step="0.1" value="1"></label>
+<label>Repulsão<input id="rp" type="range" min="80" max="600" value="280"></label>
+<label>Distância das conexões<input id="ld" type="range" min="40" max="260" value="120"></label>
+<label>Gravidade<input id="gv" type="range" min="0" max="1" step="0.05" value="0.5"></label>
+<div class="mut" style="font-size:12px;margin-bottom:10px">Role para dar zoom e arraste o fundo para mover. Com gravidade perto de 0, o nó fica onde você solta.</div>
+<label class="ck"><input id="lb" type="checkbox" checked>Mostrar nomes</label></div>
+<div class="lg" id="lg"></div>
+</aside>
+<main id="view"></main>
+<aside class="r" id="det"></aside>
+<footer class="app-footer">Criado por Ícaro Pinto Lira</footer>
+</div>
+<script src="d3.min.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const G={prot:["Protagonistas","#8a7fb5"],pref:["Prefeitura","#b99a62"],emp:["Empresa","#b0707a"],cid:["Cidade","#6f9a88"],mis:["Mistério","#6f93ae"],pol:["Polícia","#8e8c99"]};
+const SN={S1:"Terricola",S2:"Hiraku Noir"};
+const T={conta:"A conta",mae:"O mistério da Mãe",eleicao:"A eleição"};
+const K={"família":"#b99a62",aliado:"#6f9a88",rival:"#b0707a"};
+const C=[["Mika","prot"],["Dante","prot"],["Nina","prot"],["Prefeito Rocha","pref"],["Sofia","emp"],["César","emp"],["Dra. Mariana","cid"],["Galego","cid"],["Renata","cid"],["Padre Luciano","cid"],["Vulto","mis"],["Marcos","pol"]].map(([id,g])=>({id,g}));
+const CH=[[1,"S1","A conta",["conta"],["Mika","Dante","César","Sofia"]],
+[2,"S1","Fichas",["conta","mae"],["Mika","Nina","Galego","Renata","César"]],
+[3,"S1","Maré alta",["mae"],["Nina","Dra. Mariana","Padre Luciano","Vulto"]],
+[4,"S1","Eleição",["eleicao","conta"],["Prefeito Rocha","César","Sofia","Marcos","Mika"]],
+[5,"S2","Neon",["mae"],["Dante","Vulto","Marcos","Renata"]],
+[6,"S2","Cinzas",["eleicao","mae"],["Prefeito Rocha","Dante","Dra. Mariana","Vulto","Galego"]],
+[7,"S1","Retorno",["conta","eleicao","mae"],["Mika","Dante","Nina","César","Prefeito Rocha","Vulto"]],
+[8,"S2","Crossover: Maré",["mae","conta"],["Mika","Nina","Dante","Sofia","Marcos","Padre Luciano"]]].map(([n,s,t,tr,cast])=>({n,s,t,tr,cast}));
+const R=[["Mika","Dante","família"],["César","Sofia","aliado"],["Prefeito Rocha","César","aliado"],["Mika","César","rival"],["Nina","Vulto","família"],["Marcos","Prefeito Rocha","rival"],["Dra. Mariana","Padre Luciano","aliado"]].map(([a,b,t])=>[a,b,t,K[t]]);
+const LC={1:["Torre Hiraku"],2:["Restaurante"],3:["Cais"],4:["Prefeitura","Torre Hiraku"],5:["Cais","Bairro Neon"],6:["Prefeitura","Bairro Neon"],7:["Torre Hiraku","Cais"],8:["Cais","Prefeitura"]};
+const ALL_L=[...new Set(Object.values(LC).flat())];
+const LKS={cast:["Personagem aparece no capítulo","#8d8a9c"],plot:["Trama passa pelo capítulo","#8a7fb5"],ser:["Série contém o capítulo","#6f93ae"],loc:["Local usado no capítulo","#b8a56a"],co:["Personagens que contracenam","#8d8a9c"],rel:["Relações definidas","#b0707a"]};
+const TS={p:d3.symbolCircle,c:d3.symbolSquare,t:d3.symbolDiamond,s:d3.symbolStar,l:d3.symbolTriangle};
+const f={s:"",t:"",from:1,to:8,min:1,sel:null,view:"home",ty:{p:1,c:1,t:1,s:0,l:0},lk:{cast:1,plot:1,ser:0,loc:0,co:1,rel:1},hid:new Set(),iso:1,ns:1,lt:1,rp:280,ld:120,gv:0.5,lb:1,ord:"pub",ch:null,fo:0,q:"",pn:{p:1,t:1,l:0,g:1,v:0},fp:{g:1,a:1,r:1,t:1,s:1}};
+const YR={1:2024,2:2024,3:2025,4:2025,5:2019,6:2026,7:1998,8:2026},SC={S1:"#6f93ae",S2:"#b99a62"},VC=["#8a7fb5","#b99a62","#6f9a88","#b0707a"];
+const V={Mika:[["Adulta","32 anos","vivo",[1,2,4,8]],["Criança","9 anos","vivo",[7]]],Dante:[["Adulto","35 anos","vivo",[1,5,6,8]],["Jovem","17 anos","vivo",[7]]],Nina:[["Adulta","40 anos","vivo",[2,3,8]],["Idosa","78 anos","vivo",[7]]],"Prefeito Rocha":[["Idoso","68 anos","vivo",[4,6]],["Jovem","30 anos","vivo",[7]]],Galego:[["Adulto","50 anos","vivo",[2]],["Memória","—","falecido",[6]]],"Padre Luciano":[["Idoso","70 anos","vivo",[3,8]]]};
+const vers=n=>V[n]||[["Padrão","—","vivo",CH.filter(c=>c.cast.includes(n)).map(c=>c.n)]];
+const verOf=(n,ch)=>vers(n).find(v=>v[3].includes(ch))||vers(n)[0];
+const PN={p:"Personagens",t:"Tramas",l:"Locais e orgs",g:"Rede do capítulo",v:"Versões em cena"},FP={g:"Rede de conexões",a:"Aparições",r:"Relações",t:"Tramas",s:"Séries"};
+const chaps=()=>{const a=Math.min(f.from,f.to),b=Math.max(f.from,f.to);return CH.filter(c=>c.n>=a&&c.n<=b&&(!f.s||c.s===f.s)&&(!f.t||c.tr.includes(f.t)))};
+const chip=n=>`<span class="tag chip" data-c="${n}">${n}</span>`;
+$("#fs").innerHTML='<option value="">Todas</option>'+Object.entries(SN).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+$("#ft").innerHTML='<option value="">Todas</option>'+Object.entries(T).map(([k,v])=>`<option value="${k}">${v}</option>`).join("");
+$("#lg").innerHTML=Object.values(G).map(g=>`<div><b class="d" style="background:${g[1]}"></b>${g[0]}</div>`).join("")+Object.entries(K).map(([k,c])=>`<div><span style="color:${c}">- - -</span> ${k}</div>`).join("");
+let paint=()=>{},sim;
+function graph(){
+ if(sim)sim.stop();
+ const cs=chaps(),cnt={},w={};
+ cs.forEach(c=>{c.cast.forEach(a=>cnt[a]=(cnt[a]||0)+1);
+  for(let i=0;i<c.cast.length;i++)for(let j=i+1;j<c.cast.length;j++){const k=[c.cast[i],c.cast[j]].sort().join("|");w[k]=(w[k]||0)+1}});
+ const links=[],ids=new Set();let nodes=[];
+ const add=(id,type,label,n,g)=>{if(f.ty[type]&&!f.hid.has(id)){nodes.push({id,type,label,n,g});ids.add(id)}};
+ C.forEach(x=>cnt[x.id]&&add("p:"+x.id,"p",x.id,cnt[x.id],x.g));
+ cs.forEach(c=>add("c:"+c.n,"c","#"+c.n+" "+c.t,c.cast.length));
+ Object.keys(T).forEach(k=>{const n=cs.filter(c=>c.tr.includes(k)).length;n&&add("t:"+k,"t",T[k],n)});
+ Object.keys(SN).forEach(k=>{const n=cs.filter(c=>c.s===k).length;n&&add("s:"+k,"s",SN[k],n)});
+ const lc={};cs.forEach(c=>LC[c.n].forEach(l=>lc[l]=(lc[l]||0)+1));Object.keys(lc).forEach(l=>add("l:"+l,"l",l,lc[l]));
+ const ln=(a,b,k,x)=>{if(f.lk[k]&&ids.has(a)&&ids.has(b))links.push({source:a,target:b,k,...x})};
+ cs.forEach(c=>{c.cast.forEach(p=>ln("p:"+p,"c:"+c.n,"cast"));c.tr.forEach(t=>ln("t:"+t,"c:"+c.n,"plot"));ln("s:"+c.s,"c:"+c.n,"ser");LC[c.n].forEach(l=>ln("l:"+l,"c:"+c.n,"loc"))});
+ for(const k in w)if(w[k]>=f.min){const[a,b]=k.split("|");ln("p:"+a,"p:"+b,"co",{w:w[k]})}
+ R.forEach(([a,b,t,col])=>ln("p:"+a,"p:"+b,"rel",{rel:t,col}));
+ if(f.iso){const u=new Set();links.forEach(l=>{u.add(l.source);u.add(l.target)});nodes=nodes.filter(n=>u.has(n.id))}
+ const el=$("#view");el.innerHTML="";
+ if(!nodes.length){el.innerHTML='<p class="empty">Nenhum personagem nesse filtro. Amplie o intervalo de capítulos ou escolha outra trama.</p>';return}
+ const W=el.clientWidth,H=el.clientHeight||520;
+ const svg=d3.select(el).append("svg").attr("width",W).attr("height",H).call(d3.zoom().scaleExtent([0.2,6]).on("zoom",e=>svg.selectAll(":scope > g").attr("transform",e.transform))).on("dblclick.zoom",null);
+ const L=svg.append("g").selectAll("line").data(links).join("line").attr("stroke",d=>d.col||LKS[d.k][1]).attr("stroke-width",d=>f.lt*(d.k==="co"?0.8+d.w*0.9:d.rel?2:1.2)).attr("stroke-dasharray",d=>d.rel?"5 3":null);
+ const N=svg.append("g").selectAll("g").data(nodes).join("g").style("cursor","pointer")
+  .on("click",(e,d)=>{if(d.type==="p"){f.sel=f.sel===d.label?null:d.label;paint();detail()}}).on("mouseover",(e,d)=>paint(d.id)).on("mouseout",()=>paint())
+  .call(d3.drag().on("start",(e,d)=>{if(!e.active)sim.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y}).on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y}).on("end",(e,d)=>{if(!e.active)sim.alphaTarget(0);if(f.gv>=0.15){d.fx=null;d.fy=null}}));
+ N.append("path").attr("d",d=>d3.symbol(TS[d.type],Math.PI*((6+d.n*2.5)*f.ns)**2)()).attr("fill",d=>d.type==="p"?G[d.g][1]:{c:"#8d8a9c",t:"#8a7fb5",s:"#6f93ae",l:"#b8a56a"}[d.type]);
+ N.append("text").attr("display",f.lb?null:"none").text(d=>d.label).attr("dy",d=>-(10+d.n*2.5*f.ns)).attr("text-anchor","middle").attr("font-size",11).style("fill","var(--ink)").style("paint-order","stroke").style("stroke","var(--bg)").style("stroke-width","3px");
+ paint=h=>{const S=h||(f.sel?"p:"+f.sel:null),nb=new Set([S]);links.forEach(l=>{if(l.source.id===S)nb.add(l.target.id);if(l.target.id===S)nb.add(l.source.id)});
+  N.attr("opacity",d=>!S||nb.has(d.id)?1:0.12);
+  L.attr("opacity",l=>!S?0.5:(l.source.id===S||l.target.id===S)?1:0.04)};
+ sim=d3.forceSimulation(nodes).force("l",d3.forceLink(links).id(d=>d.id).distance(d=>f.ld-(d.w||1)*8).strength(0.3*Math.max(f.gv,0.4)))
+  .force("c",d3.forceManyBody().strength(-f.rp)).force("x",d3.forceX(W/2).strength(0.08*Math.max(f.gv,0.4))).force("y",d3.forceY(H/2).strength(0.08*Math.max(f.gv,0.4)))
+  .force("o",d3.forceCollide(d=>12+d.n*2.5)).on("end",()=>grav(1)).on("tick",()=>{
+   nodes.forEach(d=>{d.x=Math.max(24,Math.min(W-24,d.x));d.y=Math.max(34,Math.min(H-20,d.y))});
+   L.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+   N.attr("transform",d=>`translate(${d.x},${d.y})`)});
+ paint();
+}
+function matrix(){
+ const cs=new Set(chaps().map(c=>c.n)),o=c=>cs.has(c.n)?"":"off",cols=CH.length+1;
+ const head=CH.map(c=>`<th class="${o(c)}" title="${c.t}">${c.n}<small>${c.s}</small></th>`).join("");
+ const tr=Object.entries(T).map(([k,v])=>`<tr><td class="nm ${f.t===k?"on":""}" data-t="${k}">${v}</td>${CH.map(c=>`<td class="${o(c)}">${c.tr.includes(k)?'<i style="background:var(--acc)"></i>':""}</td>`).join("")}</tr>`).join("");
+ const cr=C.map(x=>`<tr><td class="nm ${f.sel===x.id?"on":""}" data-c="${x.id}"><b class="d" style="background:${G[x.g][1]}"></b>${x.id}</td>${CH.map(c=>`<td class="${o(c)}">${c.cast.includes(x.id)?`<i style="background:${G[x.g][1]}"></i>`:""}</td>`).join("")}</tr>`).join("");
+ $("#view").innerHTML=`<div class="sc"><table><thead><tr><th></th>${head}</tr></thead><tbody><tr class="sec"><td colspan="${cols}">Tramas por capítulo</td></tr>${tr}<tr class="sec"><td colspan="${cols}">Personagens por capítulo</td></tr>${cr}</tbody></table></div>`;
+}
+function cards(){
+ const cs=chaps();
+ $("#view").innerHTML=cs.length?`<div class="cards">${cs.map(c=>`<div class="card"><h4>#${c.n} · ${c.t}</h4><div class="mut">${SN[c.s]}</div><h5>Tramas</h5>${c.tr.map(t=>`<span class="tag" style="border-color:var(--acc)">${T[t]}</span>`).join("")}<h5>Aparecem</h5>${c.cast.map(chip).join("")}</div>`).join("")}</div>`:'<p class="empty">Nenhum capítulo nesse filtro.</p>';
+}
+function detail(){
+ if(f.view==="vault"||(f.view==="graph"&&VT))return vdetail();
+ const d=$("#det");
+ if(!f.sel){d.innerHTML='<p class="mut">Clique em um personagem para ver os capítulos, as tramas e as conexões dele.</p>';return}
+ const x=C.find(c=>c.id===f.sel),cs=CH.filter(c=>c.cast.includes(x.id)),vis=new Set(chaps().map(c=>c.n)),co={};
+ cs.forEach(c=>c.cast.forEach(n=>{if(n!==x.id)co[n]=(co[n]||0)+1}));
+ const rels=R.filter(r=>r[0]===x.id||r[1]===x.id);
+ d.innerHTML=`<h3><b class="d" style="background:${G[x.g][1]}"></b>${x.id}</h3><div class="mut">${G[x.g][0]} · em ${cs.length} de ${CH.length} capítulos</div><p><button class="tg" data-go="ficha">Abrir ficha completa</button></p>
+ <h5>Capítulos</h5>${cs.map(c=>`<span class="tag ${vis.has(c.n)?"":"off"}">#${c.n} ${c.t}</span>`).join("")}
+ <h5>Tramas</h5>${[...new Set(cs.flatMap(c=>c.tr))].map(t=>`<span class="tag">${T[t]}</span>`).join("")}
+ <h5>Mais contracena com</h5>${Object.entries(co).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,v])=>`<div>${chip(n)} <span class="mut">${v} caps</span></div>`).join("")}
+ <h5>Relações</h5>${rels.map(r=>`<div><span style="color:${r[3]}">●</span> ${chip(r[0]===x.id?r[1]:r[0])} <span class="mut">${r[2]}</span></div>`).join("")||'<span class="mut">Nenhuma definida.</span>'}`;
+}
+let NPAGES=[];try{const saved=JSON.parse(localStorage.getItem("terricola.pages")||"[]");if(Array.isArray(saved))NPAGES=saved}catch(e){}
+let NPSEL=localStorage.getItem("terricola.pages.selected")||"";
+function npSave(){try{localStorage.setItem("terricola.pages",JSON.stringify(NPAGES));localStorage.setItem("terricola.pages.selected",NPSEL)}catch(e){}}
+const npTime=n=>new Intl.DateTimeFormat("pt-BR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}).format(new Date(n||Date.now()));
+function npTouch(p){p.updated=Date.now();npSave();const status=$("#np-status");if(status)status.textContent="Salvo neste dispositivo · "+npTime(p.updated);
+ const path=$(".np-topline>span:first-child");if(path)path.textContent=npPath(p);
+ document.querySelectorAll(".np-row").forEach(row=>{if(row.dataset.id===p.id){const title=row.querySelector("b"),time=row.querySelector("small");if(title)title.textContent=p.title||"Sem título";if(time)time.textContent=npTime(p.updated)}})}
+function npTreeRow(p,depth,pages){const children=pages.filter(x=>x.parentId===p.id),row=`<div class="np-row ${p.id===NPSEL?"active":""}" data-id="${esc(p.id)}" style="--depth:${depth}"><button data-np-open="${esc(p.id)}"><span class="np-icon">▤</span><span class="np-label"><b>${esc(p.title||"Sem título")}</b><small>${npTime(p.updated)}</small></span></button><button class="np-delete" data-np-delete="${esc(p.id)}" aria-label="Excluir ${esc(p.title||"página")}" title="Excluir página">×</button></div>`;return row+children.map(x=>npTreeRow(x,depth+1,pages)).join("")}
+function npPath(page){const names=[],seen=new Set();while(page&&!seen.has(page.id)){seen.add(page.id);names.unshift(page.title||"Sem título");page=NPAGES.find(x=>x.id===page.parentId)}return names.join(" / ")}
+function notionPages(){
+ const pages=[...NPAGES].sort((a,b)=>(b.updated||0)-(a.updated||0)),ids=new Set(pages.map(p=>p.id)),roots=pages.filter(p=>!p.parentId||!ids.has(p.parentId)),selected=pages.find(p=>p.id===NPSEL);
+ const rows=roots.map(p=>npTreeRow(p,0,pages)).join("");
+ const docBody=selected?`<div class="np-topline"><span>${esc(npPath(selected))}</span><span class="np-status" id="np-status">Salvo neste dispositivo · ${npTime(selected.updated)}</span></div><input id="np-title" class="np-title" placeholder="Sem título" value="${esc(selected.title||"")}" aria-label="Título da página"><div class="np-content be" id="np-be"></div>`:`<div class="np-empty"><h2>Uma página para qualquer ideia</h2><p>Rascunhos e notas rápidas, salvos só neste dispositivo.</p><button class="tg on" data-np-new>＋ Criar página</button></div>`;
+ $("#view").innerHTML=`<div class="np"><aside class="np-explorer"><div class="np-explorer-head"><b>Páginas</b><button class="tg" data-np-new title="Nova página" aria-label="Nova página">＋</button></div><input id="np-filter" class="np-search" type="search" placeholder="Filtrar páginas" aria-label="Filtrar páginas"><div class="np-list">${rows||'<div class="mut" style="padding:8px">Nenhuma página ainda.</div>'}</div></aside><main class="np-document">${docBody}</main></div>`;
+ if(selected)bmount($("#np-be"),selected.content||"",md=>{selected.content=md;npTouch(selected)},{});
+}
+function npCreate(parentId=""){const id=Date.now().toString(36)+Math.random().toString(36).slice(2,7),p={id,parentId,title:"",content:"",updated:Date.now()};NPAGES.unshift(p);NPSEL=id;npSave();f.view="pages";render();const title=$("#np-title");if(title){title.focus();title.select()}}
+function npRemove(id){if(!confirm("Excluir esta página e suas subpáginas?"))return;const removed=new Set([id]);let changed=true;while(changed){changed=false;NPAGES.forEach(p=>{if(removed.has(p.parentId)&&!removed.has(p.id)){removed.add(p.id);changed=true}})}NPAGES=NPAGES.filter(p=>!removed.has(p.id));if(removed.has(NPSEL))NPSEL=NPAGES[0]?.id||"";npSave();render()}
+$("#view").addEventListener("click",e=>{const t=e.target.closest("[data-np-new],[data-np-open],[data-np-delete]");if(!t)return;
+ if(t.hasAttribute("data-np-new")){npCreate();return}
+ if(t.dataset.npOpen){NPSEL=t.dataset.npOpen;npSave();render();return}
+ if(t.dataset.npDelete)npRemove(t.dataset.npDelete)});
+$("#view").addEventListener("input",e=>{const t=e.target;
+ if(t.id==="np-title"){const p=NPAGES.find(x=>x.id===NPSEL);if(p){p.title=t.value;npTouch(p)}}
+ else if(t.id==="np-filter"){const q=t.value.toLowerCase();document.querySelectorAll(".np-row").forEach(row=>{row.hidden=!row.textContent.toLowerCase().includes(q)})}});
+function render(){
+ updateProjectIdentity();
+ $("#la").textContent=f.from;$("#lb").textContent=f.to;$("#lm").textContent=f.min+" caps";$("#gf").hidden=f.view!=="graph"||!!VT;$("#ga").hidden=f.view!=="graph";layout();
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.v===f.view));
+ ({home,graph:()=>{if(VT){VS.tab="graph";vault()}else graph()},matrix,chaps:cards,timeline,ficha,vault:()=>{if(VT)VS.tab="rev";vault()},git:gitv,editar,fichas:()=>lista("personagem"),tramas:()=>lista("trama"),capitulos:()=>lista("capitulo"),roteiros,hce,pages:notionPages})[f.view]();detail();bmountAll();
+}
+function upd(){f.s=$("#fs").value;f.t=$("#ft").value;f.from=+$("#fa").value;f.to=+$("#fb").value;f.min=+$("#fm").value;f.ns=+$("#ns").value;f.lt=+$("#lt").value;f.rp=+$("#rp").value;f.ld=+$("#ld").value;f.lb=$("#lb").checked;render()}
+document.querySelectorAll("aside select,aside input:not(#gv)").forEach(e=>e.addEventListener("input",upd));
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{f.view=b.dataset.v;if(f.view==="ficha")f.fo=0;render()});
+$("#view").addEventListener("click",e=>{const t=e.target.closest("[data-t],[data-c]");if(!t)return;
+ if(t.dataset.t!==undefined){f.t=f.t===t.dataset.t?"":t.dataset.t;$("#ft").value=f.t}else f.sel=t.dataset.c;render()});
+$("#det").addEventListener("click",e=>{const t=e.target.closest("[data-c]");if(t){f.sel=t.dataset.c;render()}});
+$("#det").addEventListener("click",e=>{const g=e.target.dataset.go;if(g){f.view=g;f.fo=1;render()}});
+$("#th").onclick=()=>{const r=document.documentElement,d=r.dataset.theme||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");r.dataset.theme=d==="dark"?"light":"dark"};
+$("#view").addEventListener("click",e=>{const t=e.target.closest("[data-ch],[data-ord],[data-pn],[data-fp],[data-open],[data-back]");if(!t)return;const d=t.dataset;
+ if(d.open){f.sel=d.open;f.fo=1}if(d.back)f.fo=0;if(d.ch)f.ch=+d.ch;if(d.ord)f.ord=d.ord;if(d.pn)f.pn[d.pn]=+!f.pn[d.pn];if(d.fp)f.fp[d.fp]=+!f.fp[d.fp];render()});
+function mini(names,ed,ctr){const W=340,H=270,cx=W/2,cy=H/2,P={},o=ctr?names.filter(n=>n!==ctr):names;
+ if(ctr)P[ctr]=[cx,cy];
+ o.forEach((n,i)=>{const a=i/o.length*6.2832-1.5708;P[n]=[cx+(cx-48)*Math.cos(a),cy+(cy-36)*Math.sin(a)]});
+ return `<svg viewBox="0 0 ${W} ${H}" width="100%">${ed.map(([a,b,col,w,d])=>`<line x1="${P[a][0]}" y1="${P[a][1]}" x2="${P[b][0]}" y2="${P[b][1]}" style="stroke:${col}" stroke-width="${w}" ${d?'stroke-dasharray="5 3"':""} opacity=".8"/>`).join("")}${names.map(n=>`<g data-c="${n}" style="cursor:pointer"><circle cx="${P[n][0]}" cy="${P[n][1]}" r="${n===ctr?13:9}" fill="${G[C.find(c=>c.id===n).g][1]}"/><text x="${P[n][0]}" y="${P[n][1]+(n===ctr?27:22)}" text-anchor="middle" font-size="11" style="fill:var(--ink)">${n}</text></g>`).join("")}</svg>`}
+const srt=()=>f.ord==="cron"?(a,b)=>YR[a.n]-YR[b.n]||a.n-b.n:(a,b)=>a.n-b.n;
+const vtxt=(v)=>`${v[0]}${v[1]!=="—"?" · "+v[1]:""}${v[2]==="falecido"?" · †":""}`;
+function timeline(){
+ const cs=chaps().sort(srt());
+ $("#view").innerHTML=`<div class="bar">Ordem: <button class="tg ${f.ord==="pub"?"on":""}" data-ord="pub">Publicação</button><button class="tg ${f.ord==="cron"?"on":""}" data-ord="cron">Cronologia interna</button> &nbsp; Painéis: ${Object.entries(PN).map(([k,v])=>`<button class="tg ${f.pn[k]?"on":""}" data-pn="${k}">${v}</button>`).join("")}</div><div class="track">${cs.map(c=>`<div class="stop ${f.ch===c.n?"on":""}" data-ch="${c.n}"><div class="dot" style="background:${SC[c.s]}"></div><b>#${c.n}</b><span>${c.t}</span><span>${YR[c.n]?YR[c.n]+" · ":""}${SN[c.s]}</span></div>`).join("")||'<p class="empty">Nenhum capítulo nesse filtro.</p>'}</div><div id="pan"></div>`;
+ const c=CH.find(x=>x.n===f.ch),el=$("#pan");
+ if(!c){el.innerHTML='<p class="empty">Clique em um capítulo da linha do tempo para abrir os detalhes dele.</p>';return}
+ const P={p:c.cast.map(n=>`<div>${chip(n)} <span class="mut">${vtxt(verOf(n,c.n))}</span></div>`).join(""),
+  t:c.tr.map(t=>`<div><span class="tag">${T[t]}</span> <span class="mut">caps ${CH.filter(x=>x.tr.includes(t)).map(x=>"#"+x.n).join(" ")}</span></div>`).join(""),
+  l:LC[c.n].map(l=>`<span class="tag">${l}</span>`).join(""),
+  g:mini(c.cast,R.filter(r=>c.cast.includes(r[0])&&c.cast.includes(r[1])).map(r=>[r[0],r[1],r[3],2.2,1])),
+  v:c.cast.filter(n=>vers(n).length>1).map(n=>`<div>${chip(n)} <span class="mut">${verOf(n,c.n)[0]} (também: ${vers(n).filter(v=>v!==verOf(n,c.n)).map(v=>v[0]).join(", ")})</span></div>`).join("")||'<span class="mut">Todos na versão padrão.</span>'};
+ el.innerHTML=`<div style="padding:14px 14px 0"><h3>#${c.n} · ${c.t}</h3><span class="mut">${SN[c.s]}${YR[c.n]?" · ano interno "+YR[c.n]:""}</span></div><div class="pg">${Object.keys(P).filter(k=>f.pn[k]).map(k=>`<div class="pc"><h4>${PN[k]}</h4>${P[k]}</div>`).join("")}</div>`;
+}
+function flist(){
+ const q=f.q.toLowerCase(),gs=Object.keys(G).map(g=>[g,C.filter(x=>x.g===g&&x.id.toLowerCase().includes(q))]).filter(([,l])=>l.length);
+ $("#view").innerHTML=`<div class="bar"><input id="fq" type="search" placeholder="Buscar personagem" value="${f.q}" style="width:100%;max-width:320px;font:inherit;padding:6px 10px;border:1px solid var(--ln);border-radius:6px;background:var(--pn);color:var(--ink)"></div><div style="padding:14px">${gs.map(([g,l])=>`<h5>${G[g][0]} <span class="mut">(${l.length})</span></h5><div class="cards" style="padding:0 0 10px">${l.map(x=>`<div class="card chip" data-open="${x.id}"><b class="d" style="background:${G[g][1]}"></b><b>${x.id}</b><div class="mut">${CH.filter(c=>c.cast.includes(x.id)).length} caps · ${vers(x.id).length} versão(ões)</div></div>`).join("")}</div>`).join("")||'<p class="empty">Nenhum personagem encontrado.</p>'}</div>`;
+ const i=$("#fq");if(f.q){i.focus();i.setSelectionRange(i.value.length,i.value.length)}
+}
+$("#view").addEventListener("input",e=>{if(e.target.id==="fq"){f.q=e.target.value;flist()}});
+function ficha(){
+ if(!f.fo||!f.sel)return flist();
+ const n=f.sel,x=C.find(c=>c.id===n),vs=vers(n),cs=CH.filter(c=>c.cast.includes(n)),co={};
+ cs.forEach(c=>c.cast.forEach(m=>{if(m!==n)co[m]=(co[m]||0)+1}));
+ const rels=R.filter(r=>r[0]===n||r[1]===n),oth=r=>r[0]===n?r[1]:r[0],nb=[...new Set([...Object.keys(co),...rels.map(oth)])];
+ const P={g:mini([n,...nb],nb.map(m=>{const r=rels.find(r=>oth(r)===m);return[n,m,r?r[3]:"var(--edge)",0.8+(co[m]||0)*0.8,!!r]}),n)+'<div class="mut">Tracejada colorida = relação definida; espessura = capítulos em comum.</div>',
+  a:`<div class="ap">${[...CH].sort(srt()).map(c=>{const v=cs.includes(c)&&verOf(n,c.n),i=v?vs.indexOf(v):-1;return`<div title="${c.t}" style="${i>=0?`background:${VC[i%4]};color:#1c1b22`:"opacity:.35"}">#${c.n}${i>=0?`<br>${v[0]}`:""}</div>`}).join("")}</div><div class="mut">Cada cor é uma versão do personagem.</div>`,
+  r:(Object.keys(K).map(k=>{const l=rels.filter(r=>r[2]===k);return l.length?`<h5 style="color:${K[k]}">${k}</h5>${l.map(r=>chip(oth(r))).join("")}`:""}).join("")||'<span class="mut">Nenhuma relação definida.</span>')+'<h5>Contracena mais com</h5>'+Object.entries(co).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([m,v])=>`<div>${chip(m)} <span class="mut">${v} caps</span></div>`).join(""),
+  t:[...new Set(cs.flatMap(c=>c.tr))].map(t=>`<div><span class="tag">${T[t]}</span> <span class="mut">${cs.filter(c=>c.tr.includes(t)).map(c=>"#"+c.n).join(" ")}</span></div>`).join(""),
+  s:Object.entries(SN).map(([k,v])=>{const l=cs.filter(c=>c.s===k);return l.length?`<div><span class="tag">${v}</span> <span class="mut">${l.map(c=>"#"+c.n).join(" ")}</span></div>`:""}).join("")};
+ $("#view").innerHTML=`<div class="bar"><button class="tg" data-back="1">← Lista de personagens</button>${CPATH[n]?`<button class="tg on" data-edit="${esc(n)}">Editar ficha</button>`:""}</div><div style="padding:14px 14px 0"><h3><b class="d" style="background:${G[x.g][1]}"></b>${n}</h3><span class="mut">${G[x.g][0]} · ${cs.length} capítulos · ${vs.length} versão(ões)</span></div><div class="vs">${vs.map((v,i)=>`<div class="vc" style="border-left-color:${VC[i%4]}"><b>${v[0]}</b> ${v[1]}<br>${v[2]==="falecido"?"† falecido":"vivo"} · ${v[3].map(c=>"#"+c).join(" ")}</div>`).join("")}</div><div class="bar" style="border:0">Painéis: ${Object.entries(FP).map(([k,v])=>`<button class="tg ${f.fp[k]?"on":""}" data-fp="${k}">${v}</button>`).join("")}</div><div class="pg" style="padding-top:0">${Object.keys(P).filter(k=>f.fp[k]).map(k=>`<div class="pc"><h4>${FP[k]}</h4>${P[k]}</div>`).join("")}</div>`;
+}
+/*CORE*/
+const TIPOS={serie:["Séries","#6f93ae"],capitulo:["Capítulos","#8d8a9c"],personagem:["Personagens","#8a7fb5"],trama:["Tramas","#a98a9f"],local:["Locais","#b8a56a"],roteiro:["Roteiros","#7f9a9a"],org:["Organizações","#b0707a"],grupo:["Índices de família","#b99a62"],sub:["Sub-notas","#6f9a88"],hub:["Índices gerais","#6c6a78"],outro:["Outros","#7d7b8a"]};
+const IMG=/\.(png|jpe?g|gif|webp|svg|pdf|psd|clip|zip|mp4|mov)$/i,vkey=s=>s.toLowerCase().normalize("NFC").trim();
+let OV={};try{OV=JSON.parse(localStorage.getItem("terricola.ov")||"{}")}catch(e){}
+function vclassify(path,SER){
+ const seg=path.split("/"),file=seg.pop().replace(/\.md$/i,""),dir=seg,last=dir[dir.length-1]||"",same=!!last&&(file===last||file.startsWith(last+" ("));
+ const fi=dir.findIndex(s=>/^fichas de personagem$/i.test(s)),ci=dir.findIndex(s=>/^cap[íi]tulos$/i.test(s));
+ const ti=dir.findIndex(s=>/^tramas$/i.test(s)),li=dir.findIndex(s=>/^locais$/i.test(s)),ro=dir.findIndex(s=>/^roteiros$/i.test(s));
+ if(ti>=0||li>=0||ro>=0){const i=ti>=0?ti:li>=0?li:ro;return{tipo:same&&i===dir.length-1?"hub":ti>=0?"trama":li>=0?"local":"roteiro",serie:dir[i-1]||"",grupo:""}}
+ if(ci>=0)return{tipo:same&&ci===dir.length-1?"hub":"capitulo",serie:dir[ci-1]||"",grupo:""};
+ if(fi>=0){const r=dir.slice(fi+1),serie=dir[fi-1]||"";
+  if(!r.length)return{tipo:"hub",serie,grupo:""};
+  if(r.length===1)return{tipo:same?"grupo":"personagem",serie,grupo:r[0]};
+  return{tipo:same?"personagem":"sub",serie,grupo:r[0]}}
+ const pre=dir.map((_,i)=>dir.slice(0,i+1).join("/")).reverse(),sp=pre.find(p=>SER.has(p)),serie=(sp||dir[0]||"").split("/").pop();
+ if(sp===dir.join("/"))return{tipo:same?"serie":"org",serie,grupo:""};
+ return{tipo:same?"org":"personagem",serie,grupo:same?"":last}}
+async function vload(files){
+ const fl=[...files].filter(x=>/\.md$/i.test(x.name)&&!/(^|\/)\./.test(x.webkitRelativePath||x.name));
+ const raw=await Promise.all(fl.map(async x=>({path:x.webkitRelativePath||x.name,text:await x.text()})));
+ const SER=new Set();
+ raw.forEach(r=>{const d=r.path.split("/").slice(0,-1),i=d.findIndex(s=>/^(fichas de personagem|cap[íi]tulos|tramas|locais|roteiros)$/i.test(s));if(i>0)SER.add(d.slice(0,i).join("/"))});
+ const notes=raw.map(r=>{const c=vclassify(r.path,SER),name=r.path.split("/").pop().replace(/\.md$/i,"");
+  const fm=(r.text.match(/^---\r?\n([\s\S]*?)\r?\n---/)||[])[1]||"",ft=((fm.match(/^(?:tipo|type):\s*["']?([\w-]+)/mi)||[])[1]||"").toLowerCase();
+  return{path:r.path,name,text:r.text,...c,tipo:OV[r.path]||(TIPOS[ft]?ft:c.tipo),links:[],bad:[],back:[]}});
+ const map=new Map(notes.map(n=>[n.path,n])),by=new Map(),E=new Map(),bad=new Map();
+ notes.forEach(n=>{const k=vkey(n.name);if(!by.has(k))by.set(k,[]);by.get(k).push(n)});
+ const dirOf=p=>p.split("/").slice(0,-1).join("/"),RE=/(!?)\[\[([^\]|#^]+)(?:[#^][^\]|]*)?(?:\|[^\]]*)?\]\]/g;
+ notes.forEach(n=>{let m;RE.lastIndex=0;while((m=RE.exec(n.text))){const t=m[2].trim();if(m[1]||IMG.test(t))continue;
+  const c=by.get(vkey(t.split("/").pop().replace(/\.md$/i,"")));
+  if(!c){n.bad.push(t);bad.set(t,(bad.get(t)||0)+1);continue}
+  const x=c.length===1?c[0]:(c.find(y=>dirOf(y.path)===dirOf(n.path))||c[0]);
+  if(x===n)continue;n.links.push(x.path);const k=[n.path,x.path].sort().join("\n");E.set(k,(E.get(k)||0)+1)}});
+ notes.forEach(n=>[...new Set(n.links)].forEach(p=>{const x=map.get(p);if(!x.back.includes(n.path))x.back.push(n.path)}));
+ const groups=[...new Set(notes.filter(n=>n.grupo&&["personagem","grupo","sub"].includes(n.tipo)).map(n=>n.grupo))].sort();
+ return{notes,map,by,E,bad,groups}}
+/*ENDCORE*/
+const PAL=["#8a7fb5","#b99a62","#b0707a","#6f9a88","#6f93ae","#a98a9f","#9aa36a","#7f9a9a","#b58a6a","#8e8c99"];
+const pal=g=>PAL[Math.abs([...g].reduce((a,c)=>a*31+c.charCodeAt(0)|0,7))%PAL.length];
+const ncol=n=>(n.tipo==="personagem"||n.tipo==="sub")&&n.grupo?pal(n.grupo):TIPOS[n.tipo][1];
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const VS={ty:{serie:0,capitulo:1,personagem:1,trama:1,local:1,org:1,grupo:0,sub:0,hub:0,outro:0},gr:"",min:1,lab:2,iso:1,sel:null,tab:"graph"};
+let VT=null,vsim,vpaint=()=>{};
+function vault(){
+ const el=$("#view");
+ if(!VT){el.innerHTML=`<div class="empty"><h3>Carregar a pasta do Obsidian</h3><p class="mut">Escolha a pasta do vault (a que contém "Terrícola" e "Rodrigo Crônicas de um Poeta"). Os arquivos são lidos só no seu navegador; nada é enviado.</p>${window.__TAURI__?'<button class="tg on" id="vn">Escolher pasta…</button>':'<input id="vp" type="file" webkitdirectory multiple>'}<p class="mut">Se o navegador não deixar escolher pasta, selecione os arquivos .md:</p><input id="vf" type="file" accept=".md" multiple></div>`;return}
+ const cnt={};VT.notes.forEach(n=>cnt[n.tipo]=(cnt[n.tipo]||0)+1);
+ const bar=`<div class="bar"><b>${VT.notes.length} notas</b> <span class="mut">· ${VT.E.size} conexões · ${VT.bad.size} links sem destino</span> &nbsp; <button class="tg" data-vtab="load">Trocar pasta</button></div>`;
+ if(VS.tab==="rev")return rev(bar,cnt);
+ el.innerHTML=bar+`<div class="bar">${Object.entries(TIPOS).map(([k,v])=>`<button class="tg ${VS.ty[k]?"on":""}" data-vt="${k}"><span style="color:${v[1]}">●</span> ${v[0]} ${cnt[k]||0}</button>`).join("")}</div><div class="bar">Famílias e grupos: ${VT.groups.map(g=>`<button class="tg ${VS.gr===g?"on":""}" data-vg="${esc(g)}"><span style="color:${pal(g)}">●</span> ${esc(g)}</button>`).join("")}</div><div class="bar"><label class="ck" style="display:inline-flex;margin-right:14px">Conexões mínimas <input id="vm" type="range" min="1" max="6" value="${VS.min}"> ${VS.min}</label><label class="ck" style="display:inline-flex;margin-right:14px">Nomes a partir de <input id="vl" type="range" min="0" max="12" value="${VS.lab}"> ${VS.lab}</label><label class="ck" style="display:inline-flex"><input id="vi" type="checkbox" ${VS.iso?"checked":""}>Ocultar sem conexão</label></div><div id="vg" style="height:62vh;min-height:380px"></div>`;
+ vgraph();
+}
+function vgraph(){
+ if(vsim)vsim.stop();
+ const el=$("#vg"),W=el.clientWidth,H=el.clientHeight;
+ let nodes=VT.notes.filter(n=>VS.ty[n.tipo]&&(!VS.gr||!n.grupo||n.grupo===VS.gr)).map(n=>({id:n.path,n,d:0}));
+ const ids=new Set(nodes.map(x=>x.id)),links=[],D={};
+ VT.E.forEach((w,k)=>{const[a,b]=k.split("\n");if(w>=VS.min&&ids.has(a)&&ids.has(b)){links.push({source:a,target:b,w});D[a]=(D[a]||0)+1;D[b]=(D[b]||0)+1}});
+ nodes.forEach(x=>x.d=D[x.id]||0);if(VS.iso)nodes=nodes.filter(x=>x.d);
+ if(!nodes.length){el.innerHTML='<p class="empty">Nenhuma nota nesse filtro. Ligue mais tipos acima.</p>';return}
+ const svg=d3.select(el).append("svg").attr("width",W).attr("height",H).call(d3.zoom().scaleExtent([0.2,6]).on("zoom",e=>svg.selectAll(":scope > g").attr("transform",e.transform))).on("dblclick.zoom",null),r=d=>(4+Math.sqrt(d.d)*2.2)*f.ns;
+ const drag=d3.drag().on("start",(e,d)=>{if(!e.active)vsim.alphaTarget(0.3).restart();d.fx=d.x;d.fy=d.y}).on("drag",(e,d)=>{d.fx=e.x;d.fy=e.y}).on("end",(e,d)=>{if(!e.active)vsim.alphaTarget(0);if(f.gv>=0.15)d.fx=d.fy=null});
+ const L=svg.append("g").selectAll("line").data(links).join("line").style("stroke","var(--edge)").attr("stroke-width",d=>f.lt*(0.6+Math.min(d.w,5)*0.4));
+ const N=svg.append("g").selectAll("g").data(nodes).join("g").style("cursor","pointer").on("click",(e,d)=>{VS.sel=d.id;vpaint();vdetail()}).on("mouseover",(e,d)=>vpaint(d.id)).on("mouseout",()=>vpaint()).call(drag);
+ N.append("circle").attr("r",r).attr("fill",d=>ncol(d.n));
+ const TX=N.append("text").text(d=>d.n.name).attr("dy",d=>-r(d)-4).attr("text-anchor","middle").attr("font-size",10).style("fill","var(--ink)").style("paint-order","stroke").style("stroke","var(--bg)").style("stroke-width","3px");
+ vpaint=h=>{const S=h||VS.sel,nb=new Set([S]);links.forEach(l=>{if(l.source.id===S)nb.add(l.target.id);if(l.target.id===S)nb.add(l.source.id)});
+  N.attr("opacity",d=>!S||nb.has(d.id)?1:0.12);L.attr("opacity",l=>!S?0.45:(l.source.id===S||l.target.id===S)?1:0.04);
+  TX.attr("display",d=>f.lb&&(d.d>=VS.lab||(S&&nb.has(d.id)))?null:"none")};
+ vsim=d3.forceSimulation(nodes).force("l",d3.forceLink(links).id(d=>d.id).distance(f.ld).strength(0.15*Math.max(f.gv,0.4))).force("c",d3.forceManyBody().strength(-f.rp*0.6)).force("x",d3.forceX(W/2).strength(0.05*Math.max(f.gv,0.4))).force("y",d3.forceY(H/2).strength(0.05*Math.max(f.gv,0.4))).force("o",d3.forceCollide(d=>r(d)+3)).on("end",()=>grav(1)).on("tick",()=>{
+  nodes.forEach(d=>{d.x=Math.max(20,Math.min(W-20,d.x));d.y=Math.max(24,Math.min(H-16,d.y))});
+  L.attr("x1",d=>d.source.x).attr("y1",d=>d.source.y).attr("x2",d=>d.target.x).attr("y2",d=>d.target.y);
+  N.attr("transform",d=>`translate(${d.x},${d.y})`)});
+ vpaint();
+}
+function vdetail(){
+ const d=$("#det"),n=VT&&VT.map.get(VS.sel);
+ if(!n){d.innerHTML='<p class="mut">Clique em uma nota do grafo para ver o tipo, a família e as conexões dela.</p>';return}
+ const ch=p=>`<span class="tag chip" data-vn="${esc(p)}">${esc(VT.map.get(p).name)}</span>`,out=[...new Set(n.links)];
+ d.innerHTML=`<h3>${esc(n.name)}</h3><div class="mut">${TIPOS[n.tipo][0]}${n.grupo?" · "+esc(n.grupo):""}${n.serie?" · "+esc(n.serie):""}</div><div class="mut" style="font-size:11px;word-break:break-all">${esc(n.path)}</div><h5>Cita (${out.length})</h5>${out.map(ch).join("")||"—"}<h5>Citada por (${n.back.length})</h5>${n.back.map(ch).join("")||"—"}${n.bad.length?`<h5>Links sem destino</h5>${[...new Set(n.bad)].map(b=>`<span class="tag off">${esc(b)}</span>`).join("")}`:""}`;
+}
+function rev(bar,cnt){
+ const rows=VT.notes.filter(n=>["sub","outro","org","hub","grupo"].includes(n.tipo)).slice(0,150),dup=[...VT.by].filter(([,l])=>l.length>1),bad=[...VT.bad].sort((a,b)=>b[1]-a[1]).slice(0,20);
+ $("#view").innerHTML=bar+`<div class="pg"><div class="pc"><h4>Resumo</h4>${Object.entries(TIPOS).map(([k,v])=>`<div><span style="color:${v[1]}">●</span> ${v[0]}: <b>${cnt[k]||0}</b></div>`).join("")}<h5>Como classifiquei</h5><div class="mut">Pela pasta. Dentro de "Fichas de personagem", a subpasta direta é a família e cada nota é um personagem. A nota com o nome da pasta é o índice. Outras notas dentro da pasta de um personagem viram sub-notas. "Capítulos" vira capítulos. Corrija ao lado; fica salvo neste navegador.</div></div><div class="pc" style="grid-column:span 2"><h4>Revisar (${rows.length})</h4>${rows.map(n=>`<div class="rv"><span class="p" title="${esc(n.path)}">${esc(n.name)} <small>${esc(n.path.split("/").slice(-3,-1).join("/"))}</small></span><select data-ov="${esc(n.path)}">${Object.entries(TIPOS).map(([k,v])=>`<option value="${k}" ${k===n.tipo?"selected":""}>${v[0]}</option>`).join("")}</select></div>`).join("")}</div><div class="pc"><h4>Links sem destino</h4>${bad.map(([k,v])=>`<div>${esc(k)} <span class="mut">×${v}</span></div>`).join("")||'<span class="mut">Nenhum.</span>'}</div><div class="pc"><h4>Nomes repetidos</h4>${dup.map(([k,l])=>`<div>${esc(l[0].name)} <span class="mut">×${l.length}</span></div>`).join("")||'<span class="mut">Nenhum.</span>'}</div></div>`;
+}
+$("#view").addEventListener("change",async e=>{const t=e.target;
+ if(t.id==="vp"||t.id==="vf"){if(!t.files.length)return;$("#view").innerHTML='<p class="empty">Lendo os arquivos…</p>';RF=await Promise.all([...t.files].filter(x=>/\.md$/i.test(x.name)).map(async x=>({name:x.name,webkitRelativePath:x.webkitRelativePath||x.name,_t:await x.text(),text(){return Promise.resolve(this._t)}})));VT=await vload(RF);vapply();VS.sel=null;VS.tab="graph";f.view="home";render()}
+ else if(t.dataset.ov){const n=VT.map.get(t.dataset.ov);n.tipo=OV[n.path]=t.value;try{localStorage.setItem("terricola.ov",JSON.stringify(OV))}catch(x){}vapply();vault()}
+ else if(t.id==="vm"){VS.min=+t.value;vault()}else if(t.id==="vl"){VS.lab=+t.value;vault()}else if(t.id==="vi"){VS.iso=+t.checked;vault()}});
+$("#view").addEventListener("click",e=>{const t=e.target.closest("[data-vt],[data-vg],[data-vtab]");if(!t)return;const d=t.dataset;
+ if(d.vt)VS.ty[d.vt]=+!VS.ty[d.vt];if(d.vg!==undefined)VS.gr=VS.gr===d.vg?"":d.vg;if(d.vtab){if(d.vtab==="load"){VT=null;VS.tab="graph"}else VS.tab=d.vtab}render()});
+$("#det").addEventListener("click",e=>{const t=e.target.closest("[data-vn]");if(t){VS.sel=t.dataset.vn;render()}});
+function vapply(){
+ const ns=VT.notes,pn=ns.filter(n=>n.tipo==="personagem"),used=new Set(),cid=new Map(),dirOf=p=>p.split("/").slice(0,-1).join("/");
+ pn.forEach(n=>{let id=n.name;if(used.has(id))id+=" ("+(n.grupo||"?")+")";used.add(id);cid.set(n.path,id);CPATH[id]=n.path});
+ const char=p=>{const x=VT.map.get(p);if(!x)return null;if(cid.has(p))return cid.get(p);
+  if(x.tipo==="sub"){const l=dirOf(p).split("/").pop(),o=pn.find(y=>dirOf(y.path)===dirOf(p)&&(y.name===l||y.name.startsWith(l+" (")));return o?cid.get(o.path):null}return null};
+ [C,CH,ALL_L].forEach(a=>a.length=0);R.length=0;
+ [G,K,T,SN,LC,V,YR].forEach(o=>Object.keys(o).forEach(k=>delete o[k]));
+ pn.forEach(n=>{const g=n.grupo||"Sem grupo";G[g]=[g,pal(g)];C.push({id:cid.get(n.path),g})});
+ const RT="citado na ficha";K[RT]="#6f93ae";Object.entries(RELC).forEach(([k,v])=>K[k]=v);
+ const seen=new Set();
+ const tp={};pn.forEach(n=>{for(const m of n.text.matchAll(/^- \[\[([^\]|#^]+)[^\]]*\]\][^\n]*?#rel\/([^\s#]+)/gm)){const c=VT.by.get(vkey(m[1].trim())),b=c&&char(c[0].path),a=cid.get(n.path);if(b&&a&&b!==a)tp[[a,b].sort().join("|")]=m[2].toLowerCase()}});
+ pn.forEach(n=>[...new Set(n.links)].forEach(p=>{const a=cid.get(n.path),b=char(p);if(!b||b===a)return;const k=[a,b].sort().join("|");if(!seen.has(k)){seen.add(k);const ty=tp[k]||RT;K[ty]=K[ty]||"#8e8c99";R.push([a,b,ty,K[ty]])}}));
+ const tk=new Map();ns.filter(n=>n.tipo==="trama").forEach((n,i)=>{T["t"+i]=n.name;tk.set(n.path,"t"+i)});
+ const cap=ns.filter(n=>n.tipo==="capitulo").sort((a,b)=>a.serie.localeCompare(b.serie)||(parseInt(a.name)||0)-(parseInt(b.name)||0)||a.name.localeCompare(b.name));
+ cap.forEach((n,i)=>{const s=n.serie||"—",rt=VT.notes.filter(x=>x.tipo==="roteiro"&&hchap(x)===n.name),ls=[...new Set([...n.links,...rt.flatMap(x=>x.links)])];SN[s]=s;SC[s]=SC[s]||pal(s);
+  const fm=(n.text.match(/^---\r?\n([\s\S]*?)\r?\n---/)||[])[1]||"",ano=+((fm.match(/^ano:\s*(\d+)/mi)||[])[1]||0)||undefined;
+  CH.push({n:i+1,s,t:n.name.replace(/^\d+\s*[-–.]\s*/,""),tr:ls.map(p=>tk.get(p)).filter(Boolean),cast:[...new Set(ls.map(char).filter(Boolean))]});
+  LC[i+1]=[...new Set(ls.filter(p=>["local","org"].includes(VT.map.get(p).tipo)).map(p=>VT.map.get(p).name))];YR[i+1]=ano});
+ const capN=new Map(cap.map((n,i)=>[n.name,i+1]));
+ pn.forEach(n=>{const vs=pvers((n.text.match(/^---\r?\n[\s\S]*?\r?\n---/)||[""])[0]);if(vs.length)V[cid.get(n.path)]=vs.map(v=>[v.nome,v.idade?v.idade+" anos":"—",v.status,v.caps.map(c=>capN.get(c)).filter(Boolean)])});
+ Object.values(LC).forEach(l=>l.forEach(x=>{if(!ALL_L.includes(x))ALL_L.push(x)}));
+ $("#fs").innerHTML='<option value="">Todas</option>'+Object.entries(SN).map(([k,v])=>`<option value="${esc(k)}">${esc(v)}</option>`).join("");
+ $("#ft").innerHTML='<option value="">Todas</option>'+Object.entries(T).map(([k,v])=>`<option value="${k}">${esc(v)}</option>`).join("");
+ $("#lg").innerHTML=Object.values(G).map(g=>`<div><b class="d" style="background:${g[1]}"></b>${esc(g[0])}</div>`).join("")+Object.entries(K).map(([k,c])=>`<div><span style="color:${c}">- - -</span> ${k}</div>`).join("");
+ const mx=Math.max(1,CH.length);$("#fa").max=$("#fb").max=mx;$("#fa").value=1;$("#fb").value=mx;
+ Object.assign(f,{s:"",t:"",from:1,to:mx,sel:null,ch:null,fo:0,q:""});f.hid.clear();
+ document.querySelector(".badge").textContent=`seu vault: ${C.length} personagens · ${CH.length} capítulos · ${Object.keys(T).length} tramas`;
+ gfBuild();
+}
+function grav(q){const v=f.view==="vault",s=v?vsim:sim;if(!s)return;const k=v?0.15:0.3,c=v?0.05:0.08;
+ s.force("l").strength(k*f.gv);s.force("x").strength(c*f.gv);s.force("y").strength(c*f.gv);if(!q)s.alpha(0.3).restart()}
+$("#gv").addEventListener("input",e=>{f.gv=+e.target.value;grav()});
+const RELC={aliado:"#6f9a88",rival:"#b0707a","família":"#b99a62",mentor:"#6f93ae",antagonista:"#a0505a",amor:"#a98a9f"},CPATH={};
+let RF=[],ROOTABS="",ED=null,PROJECT_NAMES={},PROJECT_EDITING=false;try{PROJECT_NAMES=JSON.parse(localStorage.getItem("terricola.projectNames")||"{}")||{}}catch(e){}
+function projectName(){return PROJECT_NAMES[ROOTABS||"local"]||(ROOTABS.split(/[\\/]/).filter(Boolean).pop())||"Terricola"}
+function updateProjectIdentity(){const title=`${projectName()} · Hiraku Comics Manager`;document.title=title;const el=$("#app-title");if(el)el.textContent=title}
+function saveProjectName(){const input=$("#project-name-input"),name=input&&input.value.trim();if(!name)return;PROJECT_NAMES[ROOTABS||"local"]=name;try{localStorage.setItem("terricola.projectNames",JSON.stringify(PROJECT_NAMES))}catch(e){}PROJECT_EDITING=false;updateProjectIdentity();home()}
+function pvers(fm){const b=(fm.match(/^versoes:[ \t]*\r?\n((?:[ \t]+.*\r?\n?)*)/m)||[])[1]||"";
+ return b.split(/^[ \t]*- (?=nome:)/m).slice(1).map(x=>{const g=k=>((x.match(new RegExp("^[ \\t]*(?:- )?"+k+":[ \\t]*(.*)$","m"))||[])[1]||"").trim();let c=[];try{c=JSON.parse(g("caps")||"[]")}catch(e){}return{nome:g("nome"),idade:g("idade"),status:g("status")||"vivo",caps:c}})}
+function fmwith(fm,vs){const b=fm.replace(/^versoes:[ \t]*\r?\n(?:[ \t]+.*\r?\n?)*/m,""),blk=vs.length?"versoes:\n"+vs.map(v=>`  - nome: ${v.nome}\n    idade: ${v.idade}\n    status: ${v.status}\n    caps: ${JSON.stringify(v.caps)}\n`).join(""):"";
+ if(!b&&!blk)return"";if(!b)return"---\n"+blk+"---\n";return b.replace(/\r?\n---[ \t]*\r?\n?$/,"\n"+blk+"---\n")}
+function psec(h,body,tail){
+ const s={h,tail,raw:body,kind:"texto",items:[],body,dirty:0},ws=x=>x.replace(/\s+$/,"");
+ if((/^- \[\[/.test(body)&&(body.match(/^- \[\[/gm)||[]).length>=2)||(!body.trim()&&/^(rela|elenco|tramas|locais|personagens)/i.test(h))){s.kind="rel";
+  s.items=!body.trim()?[]:body.split(/^(?=- \[\[)/m).map(it=>{const m=it.match(/^- (\[\[[^\]]+\]\])([^\n]*)\n?([\s\S]*)$/);return m?{link:m[1],extra:ws(m[2]),desc:ws(m[3].replace(/^ {1,4}/gm,""))}:{raw:it}})}
+ else if(/^- \*\*/.test(body)&&(body.match(/^- \*\*[^\n]*?:\*\*/gm)||[]).length>=2){s.kind="campos";
+  s.items=body.split(/^(?=- \*\*)/m).map(it=>{const m=it.match(/^- \*\*(.+?):\*\*([\s\S]*)$/);return m?{k:m[1],v:ws(m[2])}:{raw:it}})}
+ return s}
+function pdoc(text){
+ const m=text.match(/^---\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/),fm=m?m[0]:"",parts=text.slice(fm.length).split(/^(?=### )/m);
+ const pre=parts.length&&!parts[0].startsWith("### ")?parts.shift():"";
+ const secs=parts.map(p=>{const nl=p.indexOf("\n"),h=p.slice(4,nl<0?p.length:nl),r=nl<0?"":p.slice(nl+1),tail=r.match(/\s*(?:---[ \t]*\s*)?$/)[0];return psec(h,r.slice(0,r.length-tail.length),tail)});
+ return{fm,pre,secs,vers:pvers(fm),dirty:0,verDirty:0}}
+function eser(){
+ const E=ED,it=x=>(x.raw!==undefined?x.raw:x.link?"- "+x.link+x.extra+(x.desc.trim()?"\n"+x.desc.replace(/\r/g,"").split("\n").map(l=>l?"    "+l:l).join("\n"):""):`- **${x.k}:**${x.v}`).replace(/\s+$/,"");
+ return (E.verDirty?fmwith(E.fm,E.vers):E.fm)+E.pre+E.secs.map(s=>`### ${s.h}\n`+(!s.dirty?s.raw:s.kind==="texto"?s.body:s.items.map(it).join("\n"))+s.tail).join("")}
+function eopen(p,tpl,tipo){const n=VT.map.get(p),from=f.view==="editar"&&ED?ED.from:f.view;ED=pdoc(tpl||n.text);ED.path=p;ED.id=n?n.name:p.split("/").pop().replace(/\.md$/i,"");ED.tipo=tipo||n.tipo;ED.isNew=!n;ED.dirty=tpl?1:0;ED.from=from;f.sel=Object.keys(CPATH).find(k=>CPATH[k]===p)||null;rec("e",p,ED.id);f.view="editar";render()}
+async function esave(){
+ const E=ED,text=eser(),p=E.path;
+ if(window.__TAURI__)await __TAURI__.core.invoke("write_md",{path:ROOTABS+"/"+p.split("/").slice(1).join("/"),text});else E.out=text;await gitAuto(p);
+ const w=RF.find(x=>x.webkitRelativePath===p);if(w)w._t=text;else RF.push({name:p.split("/").pop(),webkitRelativePath:p,_t:text,text(){return Promise.resolve(this._t)}});
+ VT=await vload(RF);vapply();f.sel=Object.keys(CPATH).find(k=>CPATH[k]===p)||null;f.fo=1;E.dirty=0;E.isNew=0;E.fm=fmwith(E.fm,E.vers);E.verDirty=0;render()}
+async function vaultDelete(path){
+ const note=VT&&VT.map.get(path);if(!note)return;
+ if(!window.__TAURI__||!ROOTABS){alert("A exclusão de arquivos funciona no app desktop com o Vault aberto.");return}
+ if(!confirm(`Excluir “${note.name}” do Vault?`))return;
+ try{await __TAURI__.core.invoke("delete_md",{root:ROOTABS,path:path.split("/").slice(1).join("/")});RF=RF.filter(x=>x.webkitRelativePath!==path);VT=await vload(RF);vapply();
+  if(ED&&ED.path===path){ED=null;if(f.view==="editar")f.view="fichas"}if(HD&&HD.path===path){HD=null;if(f.view==="hce")f.view="roteiros"}render()
+ }catch(e){alert("Não consegui excluir a nota: "+e)}
+}
+async function vaultDuplicate(path){
+ const note=VT&&VT.map.get(path);if(!note||!window.__TAURI__||!ROOTABS)return;
+ const slash=path.lastIndexOf("/"),dir=path.slice(0,slash+1),file=path.slice(slash+1),dot=file.lastIndexOf("."),stem=dot<0?file:file.slice(0,dot),ext=dot<0?"":file.slice(dot);let copy=dir+stem+" (cópia)"+ext,n=2;
+ while(VT.map.has(copy))copy=dir+stem+` (cópia ${n++})`+ext;
+ try{await __TAURI__.core.invoke("write_md",{path:ROOTABS+"/"+copy.split("/").slice(1).join("/"),text:note.text});RF.push({name:copy.split("/").pop(),webkitRelativePath:copy,_t:note.text,text(){return Promise.resolve(this._t)}});VT=await vload(RF);vapply();render()}
+ catch(e){alert("Não consegui duplicar a nota: "+e)}
+}
+function editar(){
+ const E=ED;if(!E){f.view="ficha";return render()}
+ const rt=["",...Object.keys(RELC)],ta=(a,v,rows)=>`<textarea ${a} rows="${rows}">${esc(v)}</textarea>`;
+ const secs=E.secs.map((s,i)=>{const A=`data-s="${i}"`;let b;
+  if(s.kind==="campos")b=`<div class="eg">${s.items.map((x,j)=>x.raw!==undefined?`<div class="ef">${ta(`data-ef="raw" ${A} data-i="${j}"`,x.raw.replace(/\s+$/,""),2)}</div>`:`<div class="ef"><input data-ef="k" ${A} data-i="${j}" value="${esc(x.k)}">${ta(`data-ef="v" ${A} data-i="${j}"`,x.v.replace(/^ /,""),Math.max(1,x.v.split("\n").length))}<button class="tg" data-ea="deli" ${A} data-i="${j}">×</button></div>`).join("")}</div><button class="tg" data-ea="addf" ${A}>+ Campo</button>`;
+  else if(s.kind==="rel")b=s.items.map((x,j)=>x.raw!==undefined?"":`<div class="ef rl"><b>${esc(x.link.replace(/^\[\[|\]\]$/g,"").split("|").pop())}</b><select data-ef="ty" ${A} data-i="${j}" ${E.tipo!=="personagem"?'style="visibility:hidden"':""}>${rt.map(r=>`<option value="${r}" ${r===((x.extra.match(/#rel\/(\S+)/)||[])[1]||"")?"selected":""}>${r||"sem tipo"}</option>`).join("")}</select><button class="tg" data-ea="deli" ${A} data-i="${j}">×</button>${ta(`data-ef="desc" ${A} data-i="${j}"`,x.desc,Math.max(2,x.desc.split("\n").length))}</div>`).join("")+`<input list="dl-c" placeholder="+ Relação: digite um personagem e tecle Enter" data-ea="addr" ${A} style="width:100%">`;
+  else b=`<div class="be" data-be="s${i}"></div>`;
+  return`<div class="pc es"><div class="eh"><input class="ht" data-ef="h" ${A} value="${esc(s.h)}"><button class="tg" data-ea="dels" ${A}>remover seção</button></div>${b}</div>`}).join("");
+ const props=eprops(E),vr=E.vers.map((v,i)=>`<div class="ef vr"><input data-vf="nome" data-i="${i}" value="${esc(v.nome)}" placeholder="Criança, Jovem, Idoso…"><input data-vf="idade" data-i="${i}" value="${esc(v.idade)}" placeholder="idade" style="max-width:80px"><select data-vf="status" data-i="${i}">${["vivo","falecido","desaparecido"].map(s=>`<option ${s===v.status?"selected":""}>${s}</option>`).join("")}</select><input data-vf="caps" list="dl-k" data-i="${i}" value="${esc(v.caps.join("; "))}" placeholder="capítulos (separe por ;)"><button class="tg" data-ea="delv" data-i="${i}">×</button></div>`).join("");
+ $("#view").innerHTML=`<div class="bar"><button class="tg" data-ea="back">← Voltar</button> <b>${esc(E.id)}</b> <span class="mut" id="es">${E.dirty?"alterações não salvas":"sem alterações"}</span> <button class="tg on" data-ea="save">${window.__TAURI__?"Salvar no arquivo":"Gerar texto"}</button> <button class="tg" data-ea="discard">Descartar alterações</button></div>${E.out?`<div class="pc es" style="margin-top:12px"><h4>Texto da ficha (.md)</h4><div class="mut">No navegador não consigo gravar na sua pasta. Copie o texto abaixo e cole no arquivo, ou use o app desktop, que salva direto.</div><textarea readonly rows="12" onfocus="this.select()">${esc(E.out)}</textarea></div>`:""}<div style="padding-top:12px">${props}${E.tipo==="personagem"?`<div class="pc es"><h4>Capa e introdução</h4><div class="be" data-be="pre"></div></div>`:""}${E.tipo==="personagem"?`<div class="pc es"><h4>Versões do personagem</h4>${vr}<button class="tg" data-ea="addv">+ Versão</button></div>`:""}${secs}<div class="es">Nova seção: <button class="tg" data-ea="adds" data-k="campos">Campos</button><button class="tg" data-ea="adds" data-k="texto">Texto</button><button class="tg" data-ea="adds" data-k="rel">Relações</button></div></div><datalist id="dl-c">${C.map(c=>`<option value="${esc(c.id)}">`).join("")}</datalist><datalist id="dl-k">${VT.notes.filter(n=>n.tipo==="capitulo").map(n=>`<option value="${esc(n.name)}">`).join("")}</datalist>`;
+}
+$("#view").addEventListener("input",e=>{const t=e.target,d=t.dataset;if(!ED)return;
+ if(d.ef){const s=ED.secs[+d.s],i=+d.i;if(d.ef!=="h")s.dirty=1;
+  if(d.ef==="h")s.h=t.value;else if(d.ef==="body")s.body=t.value;else if(d.ef==="k")s.items[i].k=t.value;
+  else if(d.ef==="v")s.items[i].v=t.value===""?"":(t.value[0]==="\n"?t.value:" "+t.value);
+  else if(d.ef==="raw")s.items[i].raw=t.value;else if(d.ef==="desc")s.items[i].desc=t.value;
+  else if(d.ef==="ty"){const x=s.items[i];x.extra=x.extra.replace(/\s*#rel\/\S+/,"")+(t.value?" #rel/"+t.value:"")}}
+ else if(d.vf){ED.vers[+d.i][d.vf]=d.vf==="caps"?t.value.split(";").map(x=>x.trim()).filter(Boolean):t.value;ED.verDirty=1}
+ else return;
+ ED.dirty=1;const el=$("#es");if(el)el.textContent="alterações não salvas"});
+$("#view").addEventListener("change",e=>{const t=e.target;if(t.dataset.ea==="addr"&&t.value&&ED){const p=CPATH[t.value];if(!p)return;const s=ED.secs[+t.dataset.s];s.dirty=1;ED.dirty=1;s.items.push({link:"[["+VT.map.get(p).name+"]]",extra:"",desc:""});render()}});
+$("#view").addEventListener("click",e=>{const t=e.target.closest("[data-ea],[data-edit],[data-eo],[data-new],#vn");if(!t)return;const d=t.dataset;
+ if(t.id==="vn")return nopen();if(d.edit)return eopen(CPATH[d.edit]);if(d.eo)return ego(d.eo);if(d.new){f.nw=f.nw===d.new?"":d.new;return render()}if(d.ea==="mk")return emk();
+ const E=ED;if(!E||d.ea==="addr")return;const s=E.secs[+d.s];
+ if(d.ea==="back"||d.ea==="discard"){if(d.ea==="back"&&E.dirty){const m=$("#es");if(m)m.textContent="Salve ou descarte antes de sair";return}E.dirty=0;f.view=E.from||"ficha";f.fo=1}else if(d.ea==="save")return esave();
+ else if(d.ea==="addf"){s.dirty=1;s.items.push({k:"Novo campo",v:""})}
+ else if(d.ea==="deli"){s.dirty=1;s.items.splice(+d.i,1)}
+ else if(d.ea==="delv"){E.vers.splice(+d.i,1);E.verDirty=1}
+ else if(d.ea==="addv"){E.vers.push({nome:"",idade:"",status:"vivo",caps:[]});E.verDirty=1}
+ else if(d.ea==="dels")E.secs.splice(+d.s,1);
+ else if(d.ea==="adds")E.secs.push({h:"Nova seção",kind:d.k,items:[],body:"",raw:"",tail:"\n\n",dirty:1});
+ E.dirty=1;render()});
+async function nopen(r0){const T=window.__TAURI__,r=r0||await T.dialog.open({directory:true});if(!r)return;ROOTABS=r;try{localStorage.setItem("terricola.root",r)}catch(x){}
+ const L=await T.core.invoke("list_md",{root:r});RF=L.map(x=>({name:x.path.split("/").pop(),webkitRelativePath:x.path,_t:x.text,text(){return Promise.resolve(this._t)}}));
+ VT=await vload(RF);vapply();VS.sel=null;VS.tab="graph";f.view="home";render()}
+if(window.__TAURI__){let r=null;try{r=localStorage.getItem("terricola.root")}catch(x){}if(r){f.view="home";nopen(r).catch(()=>{})}}
+let LT="personagem";
+const LN={personagem:["fichas","Nova ficha"],trama:["tramas","Nova trama"],capitulo:["capítulos","Novo capítulo"]};
+const TPL={personagem:"### Informações Gerais\n- **Nome completo:** \n- **Idade:** \n- **Profissão:** \n\n---\n### Personalidade e Traços\n- **Traços principais:** \n- **Virtudes:** \n- **Defeitos:** \n\n---\n### História Pessoal\n\n\n---\n### Relações e Conflitos\n",
+ trama:"---\ntipo: trama\nstatus: planejada\n---\n\n### Sinopse\n\n\n---\n### Personagens envolvidos\n\n---\n### Pontos da trama\n\n\n---\n### Segredos e reviravoltas\n\n",
+ capitulo:"---\ntipo: capitulo\nstatus: rascunho\n---\n\n### Resumo\n\n\n---\n### Elenco\n\n---\n### Tramas\n\n---\n### Locais e organizações\n\n---\n### Notas\n\n"};
+const fmof=n=>(n.text.match(/^---\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/)||[""])[0];
+const fmget=(fm,k)=>((fm.match(new RegExp("^"+k+":[ \\t]*(.*)$","m"))||[])[1]||"").trim();
+function fmset(fm,k,v){const re=new RegExp("^"+k+":[ \\t]*.*(?:\\r?\\n|$)","m");
+ if(!fm)return v?`---\n${k}: ${v}\n---\n`:"";
+ if(re.test(fm))return fm.replace(re,v?k+": "+v+"\n":"");
+ return v?fm.replace(/\r?\n---[ \t]*\r?\n?$/,"\n"+k+": "+v+"\n---\n"):fm}
+function vseries(){const SP={};VT.notes.forEach(n=>{const m=n.path.match(/^(.*?)\/(?:Fichas de personagem|Cap[íi]tulos|Tramas)\//i);if(m)SP[m[1].split("/").pop()]=m[1]});return SP}
+function lista(tipo){
+ LT=tipo;const el=$("#view");
+ if(!VT){el.innerHTML='<p class="empty">Carregue a pasta na aba Vault primeiro.</p>';return}
+ const q=(f.lq||"").toLowerCase(),ns=VT.notes.filter(n=>n.tipo===tipo&&n.name.toLowerCase().includes(q)),GR={},SP=vseries();
+ ns.forEach(n=>{const k=tipo==="personagem"?n.grupo||"Sem grupo":n.serie||"—";(GR[k]=GR[k]||[]).push(n)});
+ const st=n=>fmget(fmof(n),"status")||"sem status",info=n=>tipo==="personagem"?`${n.back.length} citações`:tipo==="trama"?`${st(n)} · ${n.back.filter(p=>VT.map.get(p).tipo==="capitulo").length} caps`:st(n);
+ el.innerHTML=`<div class="bar"><input id="lq" type="search" placeholder="Buscar" value="${esc(f.lq||"")}" style="font:inherit;padding:6px 10px;border:1px solid var(--ln);border-radius:6px;background:var(--pn);color:var(--ink);width:240px"> <button class="tg on" data-new="${tipo}">+ ${LN[tipo][1]}</button> <span class="mut">${ns.length} ${LN[tipo][0]}</span></div>${f.nw===tipo?`<div class="pc es" style="margin-top:12px"><h4>${LN[tipo][1]}</h4><input id="nn" placeholder="Nome" style="width:240px"> ${tipo==="personagem"?`<input id="ng" list="dl-g" placeholder="Família ou grupo" style="width:220px"><datalist id="dl-g">${VT.groups.map(g=>`<option value="${esc(g)}">`).join("")}</datalist>`:""} <select id="ns2">${Object.keys(SP).map(s=>`<option>${esc(s)}</option>`).join("")}</select> <button class="tg on" data-ea="mk">Criar</button><div class="mut" id="nm"></div></div>`:""}<div style="padding:14px">${Object.entries(GR).map(([g,l])=>`<h5>${esc(g)} <span class="mut">(${l.length})</span></h5><div class="cards" style="padding:0 0 10px">${l.map(n=>`<div class="card chip" data-eo="${esc(n.path)}"><b>${esc(n.name)}</b><div class="mut">${info(n)}</div></div>`).join("")}</div>`).join("")||'<p class="empty">Nada por aqui ainda.</p>'}</div>`;
+ const i=$("#lq");if(f.lq){i.focus();i.setSelectionRange(i.value.length,i.value.length)}
+}
+function emk(){
+ const bad=/[\\/:*?"<>|]/g,nome=($("#nn").value||"").replace(bad,"").trim(),se=$("#ns2").value,SP=vseries(),m=$("#nm");
+ if(!nome){m.textContent="Digite um nome.";return}if(!SP[se]){m.textContent="Não achei a pasta da série.";return}
+ const g=LT==="personagem"?($("#ng").value||"Sem grupo").replace(bad,"").trim():"";
+ const dir={personagem:`${SP[se]}/Fichas de personagem/${g}`,trama:`${SP[se]}/Tramas`,capitulo:`${SP[se]}/Capítulos`}[LT],path=dir+"/"+nome+".md";
+ if(VT.map.has(path)){m.textContent="Já existe uma nota com esse nome nessa pasta.";return}
+ f.nw="";eopen(path,TPL[LT],LT)}
+function eprops(E){
+ const OPT={trama:["planejada","em andamento","resolvida","abandonada"],capitulo:["rascunho","roteirizado","desenhando","finalizado","publicado"]}[E.tipo],n=VT.map.get(E.path),g={};
+ if(n)[...new Set(n.links),...n.back].forEach(p=>{const x=VT.map.get(p);if(x&&["personagem","trama","capitulo","org","local"].includes(x.tipo))(g[x.tipo]=g[x.tipo]||new Set()).add(p)});
+ const st=OPT?`<label class="ck" style="display:inline-flex;margin-right:14px">Status <select data-pf="status">${["",...OPT].map(o=>`<option ${o===fmget(E.fm,"status")?"selected":""}>${o}</option>`).join("")}</select></label>`:"",
+  an=E.tipo==="capitulo"?`<label class="ck" style="display:inline-flex">Ano interno <input data-pf="ano" value="${esc(fmget(E.fm,"ano"))}" style="width:90px"></label>`:"";
+ return `<div class="pc es"><h4>Propriedades e vínculos</h4><div>${st}${an}</div><input list="dl-n" data-ea="elk" placeholder="+ Vincular personagem, trama, local ou organização (digite e tecle Enter)" style="width:100%;margin:8px 0"><datalist id="dl-n">${VT.notes.filter(x=>["personagem","trama","org","local"].includes(x.tipo)&&x.path!==E.path).map(x=>`<option value="${esc(x.name)}">`).join("")}</datalist>${Object.entries(g).map(([k,s])=>`<h5>${TIPOS[k][0]}</h5>${[...s].map(p=>`<span class="tag chip" data-eo="${esc(p)}">${esc(VT.map.get(p).name)}</span>`).join("")}`).join("")}</div>`}
+function elink(p){const x=VT.map.get(p),rx={personagem:/^(elenco|personagens|rela)/i,trama:/^tramas/i}[x.tipo]||/^(locais|organiza)/i;
+ let s=ED.secs.find(s=>s.kind==="rel"&&rx.test(s.h));
+ if(!s){s={h:{personagem:"Elenco",trama:"Tramas"}[x.tipo]||"Locais e organizações",kind:"rel",items:[],body:"",raw:"",tail:"\n\n",dirty:1};ED.secs.push(s)}
+ s.dirty=1;s.items.push({link:"[["+x.name+"]]",extra:"",desc:""});ED.dirty=1}
+function ego(p){if(ED&&f.view==="editar"&&ED.dirty){const m=$("#es");if(m)m.textContent="Salve ou descarte antes de abrir outra nota";return}if(VT&&VT.map.get(p))eopen(p)}
+$("#view").addEventListener("input",e=>{const t=e.target,d=t.dataset;
+ if(t.id==="lq"){f.lq=t.value;lista(LT)}
+ else if(d.pf&&ED){ED.fm=fmset(ED.fm,d.pf,t.value.trim());ED.dirty=1;const m=$("#es");if(m)m.textContent="alterações não salvas"}});
+$("#view").addEventListener("change",e=>{const t=e.target;if(t.dataset.ea==="elk"&&t.value&&ED){const x=VT.notes.find(n=>n.name===t.value);if(x){elink(x.path);render()}}});
+const HT={pag:"Página",pan:"Painel",desc:"Descrição",fala:"Fala",leg:"Legenda",sfx:"SFX",nota:"Nota"},HCY=["desc","fala","leg","sfx","nota"];
+let HD=null;
+const hchap=x=>fmget(fmof(x),"capitulo").replace(/^"?\[\[|\]\]"?$/g,""),hfind=cn=>VT.notes.find(n=>n.tipo==="roteiro"&&hchap(n)===cn);
+const alias=id=>id.split(",")[0].replace(/\s*\(.*\)\s*/,"").trim().toUpperCase();
+const AL=()=>{const m={};C.forEach(c=>{const a=alias(c.id);if(!m[a])m[a]=c.id});return m};
+const gcol=id=>{const c=C.find(x=>x.id===id);return c&&G[c.g]?G[c.g][1]:"#8e8c99"},wc=s=>(s.trim().match(/\S+/g)||[]).length;
+const hmd=s=>m2h(s);
+function hparse(text){
+ const m=text.match(/^---\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/),fm=m?m[0]:"";
+ return{fm,B:bparse(text.slice(fm.length),{script:true})}}
+function hcast(D){const A=AL();return[...new Set(D.B.filter(b=>b.t==="fala").map(b=>A[(b.who||"").toUpperCase()]).filter(Boolean))].map(id=>"[["+VT.map.get(CPATH[id]).name+"]]")}
+function hfm(D){let fm=D.fm||"";const c=hcast(D);fm=fmset(fm,"tipo","roteiro");fm=fmset(fm,"capitulo",`"[[${D.ch}]]"`);return fmset(fm,"elenco",c.length?JSON.stringify(c):"")}
+function hser(D){return hfm(D)+"\n"+bser(D.B,{script:true})+"\n"}
+function hmeta(D,A){const M=D.B.map(()=>({})),pages=[],panels=[];let pn=null,pg=null,p=0,q=0;
+ D.B.forEach((b,i)=>{
+  if(b.t==="pag"){p++;q=0;pn=null;pg={i,n:p,words:0,who:new Set(),title:b.txt,panels:[]};pages.push(pg);M[i].n=p}
+  else if(b.t==="pan"){q++;pn={i,n:q,pg:p,words:0,who:new Set(),shot:b.txt};if(pg)pg.panels.push(pn);panels.push(pn);M[i].n=q}
+  else if(b.t==="fala"||b.t==="leg"){const w=wc(b.txt||""),id=b.t==="fala"?A[(b.who||"").toUpperCase()]:null;if(pn)pn.words+=w;if(pg)pg.words+=w;if(id){if(pn)pn.who.add(id);if(pg)pg.who.add(id)}}});
+ return{M,pages,panels}}
+function hwc(){const{panels}=hmeta(HD,AL());panels.forEach(p=>{const e=$(`[data-wc="${p.i}"]`);if(e){e.textContent=p.words+" pal.";e.classList.toggle("hi",p.words>40)}})}
+function houtline(D,A){const{pages}=hmeta(D,A),dots=s=>[...s].slice(0,8).map(id=>`<i style="background:${gcol(id)}" title="${esc(id)}"></i>`).join("");return pages.map(pg=>`<div class="op" data-hj="${pg.i}">Página ${pg.n}${pg.title?` — ${esc(pg.title)}`:""}<span class="dt">${dots(pg.who)}</span></div>`+pg.panels.map(p=>`<div class="oq" data-hj="${p.i}">Painel ${p.n}${p.shot?` · ${esc(p.shot)}`:""}<span class="dt">${dots(p.who)}</span></div>`).join("")).join("")||'<div class="mut" style="padding:8px">Adicione uma página com /page ou pelo botão acima.</div>'}
+function roteiros(){
+ if(!VT){$("#view").innerHTML='<p class="empty">Carregue a pasta na aba Vault primeiro.</p>';return}
+ const cs=VT.notes.filter(n=>n.tipo==="capitulo").sort((a,b)=>a.serie.localeCompare(b.serie)||a.name.localeCompare(b.name));
+ $("#view").innerHTML=`<div class="bar"><b>Hiraku Comics Editor</b> <span class="mut">escolha um capítulo para abrir ou criar o roteiro dele</span></div><div class="cards">${cs.map(n=>{const r=hfind(n.name),pg=r?(r.text.match(/^## P[áa]gina/gm)||[]).length:0;return`<div class="card chip" data-ho="${esc(n.path)}"><b>${esc(n.name)}</b><div class="mut">${esc(n.serie)} · ${r?pg+" páginas":"sem roteiro ainda"}</div></div>`}).join("")||'<p class="empty">Nenhum capítulo ainda. Crie um em ✎ Capítulos.</p>'}</div>`}
+function hopen(cp){
+ if(!VT||!VT.map.get(cp))return;
+ const ch=VT.map.get(cp),cn=ch.name,ex=hfind(cn),pre=/\/Cap[íi]tulos\//i.test(ch.path)?ch.path.replace(/\/Cap[íi]tulos\/.*$/i,""):ch.path.split("/").slice(0,-1).join("/");
+ const P=ex?hparse(ex.text):{fm:"",B:[{t:"pag",txt:""},{t:"pan",txt:""},{t:"text",txt:""}]},from=f.view==="hce"&&HD?HD.from:f.view,empty=P.B.findIndex(b=>!b.txt&&["desc","text","fala","leg","sfx","nota"].includes(b.t));
+ HD={path:ex?ex.path:`${pre}/Roteiros/Roteiro — ${cn}.md`,ch:cn,fm:P.fm,B:P.B,tab:"script",cur:0,dirty:ex?0:1,from,out:null,fi:empty<0?null:empty};rec("h",cp,cn);f.view="hce";render()}
+async function hsave(){
+ const D=HD,text=hser(D),p=D.path;
+ if(window.__TAURI__)await __TAURI__.core.invoke("write_md",{path:ROOTABS+"/"+p.split("/").slice(1).join("/"),text});else D.out=text;await gitAuto(p);
+ const w=RF.find(x=>x.webkitRelativePath===p);if(w)w._t=text;else RF.push({name:p.split("/").pop(),webkitRelativePath:p,_t:text,text(){return Promise.resolve(this._t)}});
+ VT=await vload(RF);vapply();D.dirty=0;render()}
+function hblk(b,i,n,pw,A){const a=`data-hb="${i}"`,v=s=>esc(s||""),ta=`<textarea data-hf="txt" ${a} rows="1" placeholder="${b.t==="desc"?"Descreva a cena…":""}">${v(b.txt)}</textarea>`;
+ if(b.t==="pag")return`<div class="bk pg" ${a}><span class="lb">Página ${n}</span><input data-hf="txt" ${a} placeholder="título da página (opcional)" value="${v(b.txt)}"></div>`;
+ if(b.t==="pan")return`<div class="bk pn" ${a}><span class="lb">Painel ${n}</span><input data-hf="txt" ${a} placeholder="enquadramento: plano geral, close…" value="${v(b.txt)}"><span class="wc ${pw>40?"hi":""}" data-wc="${i}">${pw} pal.</span></div>`;
+ if(b.t==="fala")return`<div class="bk fl" ${a}><span class="lb">Fala</span><input class="who ${A[(b.who||"").toUpperCase()]?"":"bad"}" list="dl-who" data-hf="who" ${a} placeholder="PERSONAGEM" value="${v(b.who)}"><input class="par" data-hf="par" ${a} placeholder="(off, sussurro…)" value="${v(b.par)}">${ta}</div>`;
+ return`<div class="bk ${b.t}" ${a}><span class="lb">${HT[b.t]}</span>${ta}</div>`}
+function hlayout(D){let p=0,q=0;return D.B.map(b=>{
+ if(b.t==="pag"){p++;q=0;return`<h3 class="lp">Página ${p}${b.txt?` — ${esc(b.txt)}`:""}</h3>`}
+ if(b.t==="pan"){q++;return`<div class="lq"><b>Painel ${q}</b>${b.txt?` — ${esc(b.txt)}`:""}</div>`}
+ if(b.t==="fala")return`<div class="ld"><b>${esc((b.who||"?").toUpperCase())}</b>${b.par?` <i>(${esc(b.par)})</i>`:""}<br>${hmd(b.txt)}</div>`;
+ if(b.t==="leg")return`<div class="ld"><b>LEGENDA</b><br>${hmd(b.txt)}</div>`;
+ if(b.t==="sfx")return`<div class="ld"><b>SFX</b> ${esc(b.txt)}</div>`;
+ if(b.t==="nota")return`<div class="ln">${esc(b.txt)}</div>`;
+ return`<p>${hmd(b.txt).replace(/\n/g,"<br>")}</p>`}).join("")}
+function hrel(D,A){const{pages,panels}=hmeta(D,A),sp={},unk=new Set(),words=D.B.filter(b=>b.t==="fala"||b.t==="leg").reduce((a,b)=>a+wc(b.txt||""),0);
+ D.B.filter(b=>b.t==="fala").forEach(b=>{const k=(b.who||"?").toUpperCase();sp[k]=(sp[k]||0)+wc(b.txt||"");if(!A[k])unk.add(k)});
+ const mx=Math.max(1,...Object.values(sp)),heavy=panels.filter(p=>p.words>40),many=pages.filter(p=>p.panels.length>9);
+ return`<div class="pg"><div class="pc"><h4>Números</h4><div>Páginas <b>${pages.length}</b></div><div>Painéis <b>${panels.length}</b> <span class="mut">${pages.length?"("+(panels.length/pages.length).toFixed(1)+" por página)":""}</span></div><div>Palavras em falas e legendas <b>${words}</b></div></div><div class="pc"><h4>Quem fala</h4>${Object.entries(sp).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div>${esc(k)} <span class="mut">${v} pal.</span><div style="height:5px;border-radius:3px;background:${gcol(A[k])};width:${Math.round(v/mx*100)}%"></div></div>`).join("")||'<span class="mut">Ninguém fala ainda.</span>'}</div><div class="pc"><h4>Alertas</h4>${heavy.map(p=>`<div>Pág. ${p.pg}, painel ${p.n}: ${p.words} palavras <span class="mut">(muito texto)</span></div>`).join("")}${many.map(p=>`<div>Página ${p.n}: ${p.panels.length} painéis <span class="mut">(muitos)</span></div>`).join("")}${[...unk].map(k=>`<div>${esc(k)} fala, mas não tem ficha</div>`).join("")}${heavy.length+many.length+unk.size?"":'<span class="mut">Nenhum alerta.</span>'}</div></div>`}
+function hce(){
+ const D=HD;if(!D){f.view="roteiros";return render()}
+ const A=AL(),{pages,panels}=hmeta(D,A),cb=D.B[D.cur],types=[...Object.entries(HT),...BT.filter(x=>!['div','img'].includes(x[0])).map(x=>[x[0],x[2]])];
+ const bar=`<div class="bar"><button class="tg" data-ha="back">← Roteiros</button> <b>${esc(D.ch)}</b> <span class="mut" id="hs">${D.dirty?"alterações não salvas":"salvo"}</span> ${[["script","Roteiro"],["layout","Layout"],["rel","Relatório"]].map(([k,l])=>`<button class="tg ${D.tab===k?"on":""}" data-ha="tab" data-k="${k}">${l}</button>`).join("")}${D.tab==="script"?` <select id="htype">${types.map(([k,v])=>`<option value="${k}" ${cb&&cb.t===k?"selected":""}>${v}</option>`).join("")}</select><button class="tg" data-hm="1" data-ha="b"><b>B</b></button><button class="tg" data-hm="1" data-ha="i"><i>I</i></button><button class="tg" data-ha="pan">+ Painel</button><button class="tg" data-ha="pag">+ Página</button><button class="tg" data-ha="del">Excluir bloco</button>`:""} <button class="tg on" data-ha="save">${window.__TAURI__?"Salvar":"Gerar texto"}</button><button class="tg" data-ha="discard">Descartar</button></div>${D.out?`<div class="pc es" style="margin-top:12px"><h4>Texto do roteiro (.md)</h4><div class="mut">No navegador não consigo gravar na sua pasta. Copie o texto e cole no arquivo, ou use o app desktop.</div><textarea readonly rows="10" onfocus="this.select()">${esc(D.out)}</textarea></div>`:""}`;
+ let body;
+ if(D.tab==="script")body=`<div class="hw"><div class="ho" id="h-outline">${houtline(D,A)}</div><div class="hs"><div class="sheet"><div class="be script-editor" id="hce-be"></div></div><div class="mut" style="text-align:center;margin:10px">Enter cria o próximo bloco · / abre os blocos · arraste ⋮⋮ para reorganizar · Ctrl+Enter cria painel · Ctrl+Shift+Enter cria página</div></div></div><datalist id="dl-who">${Object.keys(A).map(k=>`<option value="${esc(k)}">`).join("")}</datalist>`;
+ else if(D.tab==="layout")body=`<div class="hs" style="height:auto"><div class="sheet hl">${hlayout(D)}</div></div>`;
+ else body=hrel(D,A);
+ $("#view").innerHTML=bar+body;
+ if(D.tab==="script"){
+  const editor=$("#hce-be");bmount(editor,bser(D.B,{script:true}),md=>{const active=editor.querySelector(".nb:focus-within");D.B=bparse(md,{script:true});if(active)D.cur=+active.dataset.i;D.dirty=1;const status=$("#hs");if(status)status.textContent="alterações não salvas";const outline=$("#h-outline");if(outline)outline.innerHTML=houtline(D,A)},{script:true});
+  if(D.fi==null){const i=editor.__be.B.length-1,b=editor.__be.B[i];if(b&&b.t==="text"&&!b.txt)D.fi=i}
+  if(D.fi!=null){const el=editor.querySelector(`.nb[data-i="${D.fi}"] .ed`);if(el){el.focus();el.scrollIntoView({block:"center"})}D.fi=null}
+ }
+}
+$("#view").addEventListener("input",e=>{const t=e.target,d=t.dataset;if(f.view!=="hce"||!HD||!d.hf)return;
+ HD.B[+d.hb][d.hf]=t.value;HD.dirty=1;const s=$("#hs");if(s)s.textContent="alterações não salvas";
+ if(t.tagName==="TEXTAREA"){t.style.height="auto";t.style.height=t.scrollHeight+"px"}
+ if(d.hf==="who")t.classList.toggle("bad",!AL()[t.value.toUpperCase()]);
+ hwc()});
+$("#view").addEventListener("focusin",e=>{if(f.view!=="hce"||!HD)return;const b=e.target.closest("[data-hb],.script-editor .nb");if(b){HD.cur=+(b.dataset.hb??b.dataset.i);const s=$("#htype");if(s&&HD.B[HD.cur])s.value=HD.B[HD.cur].t}});
+$("#view").addEventListener("keydown",e=>{const t=e.target;if(f.view!=="hce"||!HD||t.dataset.hb===undefined)return;const i=+t.dataset.hb,B=HD.B,b=B[i],go=n=>{HD.fi=n;HD.cur=n;HD.dirty=1;render()};
+ if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();if(e.shiftKey){B.splice(i+1,0,{t:"pag",txt:""},{t:"pan",txt:""});go(i+2)}else{B.splice(i+1,0,{t:"pan",txt:""});go(i+1)}return}
+ if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();const k={pag:"pan",pan:"desc",desc:"fala",fala:"fala",leg:"desc",sfx:"desc",nota:"desc"}[b.t];B.splice(i+1,0,k==="fala"?{t:k,who:"",par:"",txt:""}:{t:k,txt:""});go(i+1);return}
+ if(e.key==="Tab"&&t.tagName==="TEXTAREA"&&HCY.includes(b.t)){e.preventDefault();const k=HCY[(HCY.indexOf(b.t)+(e.shiftKey?-1:1)+HCY.length)%HCY.length];b.t=k;if(k==="fala"&&b.who===undefined){b.who="";b.par=""}go(i);return}
+ if(e.key==="Backspace"&&t.tagName==="TEXTAREA"&&t.value===""&&i>0&&b.t!=="pag"){e.preventDefault();B.splice(i,1);go(i-1)}});
+$("#view").addEventListener("change",e=>{const t=e.target;if(t.id==="htype"&&HD){const el=$("#hce-be"),S=el&&el.__be;if(S&&S.B[HD.cur])bturn(el,S,HD.cur,t.value)}});
+$("#view").addEventListener("mousedown",e=>{if(e.target.closest("[data-hm]"))e.preventDefault()});
+$("#view").addEventListener("click",e=>{const t=e.target.closest("[data-ho],[data-ha],[data-hj]");if(!t)return;const d=t.dataset;
+ if(d.ho)return hopen(d.ho);const D=HD;if(!D)return;
+ if(d.hj!==undefined){const el=$(`#hce-be .nb[data-i="${d.hj}"]`);if(el){el.scrollIntoView({block:"start",behavior:"smooth"});const x=el.querySelector(".ed,input");if(x)x.focus()}return}
+ const a=d.ha,B=D.B,i=Math.max(0,D.cur);
+ if(a==="back"){if(D.dirty){const m=$("#hs");if(m)m.textContent="Salve ou descarte antes de sair";return}f.view=D.from||"roteiros";return render()}
+ if(a==="discard"){D.dirty=0;f.view=D.from||"roteiros";return render()}
+ if(a==="save")return hsave();
+ if(a==="tab"){D.tab=d.k;return render()}
+ if(a==="b"||a==="i"){const x=document.activeElement;if(x&&x.tagName==="TEXTAREA"){const s=x.selectionStart,en=x.selectionEnd,m=a==="b"?"**":"*";x.setRangeText(m+x.value.slice(s,en)+m,s,en,"end");x.dispatchEvent(new Event("input",{bubbles:true}))}else if(x&&x.closest(".be .ed")){document.execCommand(a==="b"?"bold":"italic");binput(x)}return}
+ if(a==="pan"){B.splice(i+1,0,{t:"pan",txt:""});D.fi=i+1}
+ else if(a==="pag"){B.splice(i+1,0,{t:"pag",txt:""},{t:"pan",txt:""});D.fi=i+1}
+ else if(a==="del"){if(B.length>1){B.splice(i,1);D.fi=Math.max(0,i-1)}}
+ D.dirty=1;if(D.fi!=null)D.cur=D.fi;render()});
+const GS={auto:false,out:""};try{GS.auto=localStorage.getItem("terricola.gitauto")==="1"}catch(e){}
+async function gitc(cmd,a){return __TAURI__.core.invoke(cmd,{root:ROOTABS,...(a||{})})}
+async function gitAuto(p){if(window.__TAURI__&&ROOTABS&&GS.auto){try{await gitc("git_commit",{msg:"Atualiza "+p.split("/").pop().replace(/\.md$/i,"")})}catch(e){}}}
+function rec(k,p,n){try{const r=JSON.parse(localStorage.getItem("terricola.recent")||"[]").filter(x=>x.p!==p);r.unshift({k,p,n});localStorage.setItem("terricola.recent",JSON.stringify(r.slice(0,8)))}catch(e){}}
+function home(){
+ updateProjectIdentity();
+ const n={p:C.length,c:CH.length,t:Object.keys(T).length,r:VT?VT.notes.filter(x=>x.tipo==="roteiro").length:0,notas:VT?VT.notes.length:0,e:VT?VT.E.size:0};
+ const card=(v,ic,t,d,c)=>`<div class="card chip hc" data-nav="${v}"><div class="hi2">${ic}</div><b>${t}</b><div class="mut">${d}</div><div class="hn">${c==null?"":c}</div></div>`;
+ let rc=[];try{rc=JSON.parse(localStorage.getItem("terricola.recent")||"[]")}catch(e){}
+ $("#view").innerHTML=`<div class="hp"><div class="hh">${PROJECT_EDITING?`<div class="project-heading"><input id="project-name-input" value="${esc(projectName())}" aria-label="Nome do projeto"><button class="tg on" data-project-save title="Salvar nome" aria-label="Salvar nome">✓</button><button class="tg" data-project-cancel title="Cancelar" aria-label="Cancelar">×</button></div>`:`<div class="project-heading"><h2>${esc(projectName())}</h2><button class="tg" data-project-rename title="Renomear projeto" aria-label="Renomear projeto">✎</button></div>`}<div class="mut">Hiraku Comics Manager · ${VT?`${n.notas} notas · ${n.e} conexões`:"nenhum Vault carregado"}</div>${VT?"":`<div style="margin-top:14px">${window.__TAURI__?'<button class="tg on" id="vn">Escolher pasta do Vault…</button>':'<button class="tg on" data-nav="vault">Carregar o Vault</button>'}</div>`}</div>
+ <h5>Visualizar</h5><div class="cards">${card("graph","◉","Grafo","Notas, personagens e conexões do vault",n.e+" conexões")}${card("matrix","▦","Matriz","Quem aparece em cada capítulo e trama")}${card("timeline","⟷","Timeline","Capítulos por publicação ou cronologia",n.c+" capítulos")}${card("ficha","☺","Fichas (visão rápida)","Rede e versões de cada personagem",n.p+" personagens")}</div>
+ <h5>Escrever</h5><div class="cards">${card("fichas","✎","Fichas","Editor de fichas de personagem",n.p)}${card("tramas","✎","Tramas","Tramas e seus vínculos",n.t)}${card("capitulos","✎","Capítulos","Resumo, elenco e status",n.c)}${card("roteiros","✎","Roteiros","Hiraku Comics Editor",n.r+" roteiros")}</div>
+ <h5>Projeto</h5><div class="cards">${card("vault","▣","Vault","Pasta, classificação e revisão",n.notas+" notas")}${card("git","⎇","Git","Versões e commits",'<span id="hg"></span>')}</div>
+ ${rc.length?`<h5>Continuar de onde parou</h5><div style="padding:8px 18px">${rc.map(r=>`<span class="tag chip" ${r.k==="h"?"data-ho":"data-eo"}="${esc(r.p)}">${esc(r.n)}</span>`).join("")}</div>`:""}</div>`;
+ if(window.__TAURI__&&ROOTABS)gitc("git_status").then(s=>{const k=s.split("\n").filter(l=>l&&!l.startsWith("##")).length,e=$("#hg");if(e&&f.view==="home")e.textContent=k?k+" alterações":"em dia"}).catch(()=>{})}
+async function gitv(){
+ const el=$("#view");
+ if(!window.__TAURI__){el.innerHTML='<div class="empty"><h3>Git</h3><p class="mut">A integração com Git funciona no app desktop.</p></div>';return}
+ if(!ROOTABS){el.innerHTML='<div class="empty"><h3>Git</h3><p class="mut">Carregue a pasta do vault primeiro, na Home.</p></div>';return}
+ el.innerHTML='<p class="empty">Lendo o repositório…</p>';
+ let st="",lg="",err="";
+ try{st=await gitc("git_status")}catch(e){err=String(e)}
+ if(!err){try{lg=await gitc("git_log")}catch(e){lg=""}}
+ if(f.view!=="git")return;
+ const out=GS.out?`<div class="pc es" style="margin:10px 0"><div class="mut" style="white-space:pre-wrap">${esc(GS.out)}</div></div>`:"";
+ if(err){el.innerHTML=`<div class="hp"><h5>Git</h5><div class="pc es">${/not a git repository/i.test(err)?'<h4>Esta pasta ainda não é um repositório Git</h4><button class="tg on" data-git="init">Iniciar repositório</button>':`<h4>Não consegui ler o Git</h4><div class="mut">${esc(err)}</div>`}${out}</div></div>`;return}
+ const L=st.split("\n").filter(Boolean),br=(L[0]||"").replace(/^## /,""),ch=L.slice(1),lab=c=>c.startsWith("??")||c.includes("A")?"novo":c.includes("D")?"removido":"modificado";
+ el.innerHTML=`<div class="hp"><h5>Repositório · ${esc(br)}</h5><div class="pc es" style="margin-top:10px"><h4>${ch.length?ch.length+" alterações":"Tudo em dia"}</h4>${ch.slice(0,40).map(l=>`<div class="rv"><span class="p">${esc(l.slice(3))}</span><span class="mut">${lab(l.slice(0,2))}</span></div>`).join("")}<div style="margin-top:10px"><input id="gm" placeholder="Mensagem do commit" value="Atualiza fichas e roteiros" style="width:55%"> <button class="tg on" data-git="commit">Commit</button><button class="tg" data-git="push">Commit e push</button><button class="tg" data-git="refresh">Atualizar</button></div><label class="ck" style="margin-top:10px"><input id="gau" type="checkbox" ${GS.auto?"checked":""}>Commit automático ao salvar uma nota</label></div>${out}<h5>Histórico recente</h5><div class="pc es" style="margin-top:10px">${lg.split("\n").filter(Boolean).map(x=>{const[h,d,...m]=x.split("|");return`<div class="rv"><span class="p">${esc(m.join("|"))}</span><span class="mut">${esc(d)} · ${esc(h)}</span></div>`}).join("")||'<span class="mut">Sem commits ainda.</span>'}</div></div>`}
+$("#view").addEventListener("click",async e=>{const t=e.target.closest("[data-git],[data-nav]");if(!t)return;
+ if(t.dataset.nav){f.view=t.dataset.nav;if(f.view==="ficha")f.fo=0;return render()}
+ const a=t.dataset.git;GS.out="";
+ try{if(a==="init")GS.out=await gitc("git_init");
+  else if(a==="commit"||a==="push"){GS.out=await gitc("git_commit",{msg:($("#gm").value||"Atualiza o vault").trim()});if(a==="push")GS.out+="\n"+await gitc("git_push")}}
+ catch(x){GS.out=String(x)}
+ gitv()});
+$("#view").addEventListener("change",e=>{if(e.target.id==="gau"){GS.auto=e.target.checked;try{localStorage.setItem("terricola.gitauto",GS.auto?"1":"0")}catch(x){}}});
+document.querySelector("h1").onclick=()=>{PROJECT_EDITING=false;f.view="home";render()};
+$("#view").addEventListener("click",e=>{if(e.target.closest("[data-project-rename]")){PROJECT_EDITING=true;home();$("#project-name-input").focus();$("#project-name-input").select()}else if(e.target.closest("[data-project-save]"))saveProjectName();else if(e.target.closest("[data-project-cancel]")){PROJECT_EDITING=false;home()}});
+$("#view").addEventListener("keydown",e=>{if(e.target.id==="project-name-input"&&e.key==="Enter"){e.preventDefault();saveProjectName()}else if(e.target.id==="project-name-input"&&e.key==="Escape"){PROJECT_EDITING=false;home()}});
+const SBO={},DBO={},FV=["graph","matrix","chaps","timeline"],RV=["graph","ficha","vault"],sbOpen=v=>SBO[v]===undefined?v==="graph":SBO[v],detOpen=v=>DBO[v]===undefined?v==="graph":DBO[v];
+function layout(){const A=document.querySelector(".app"),hf=FV.includes(f.view),o=hf&&sbOpen(f.view),r=RV.includes(f.view)&&detOpen(f.view);A.classList.toggle("nl",!o);A.classList.toggle("nr",!r);$("#sbt").hidden=!hf;$("#sbt").classList.toggle("on",o);$("#dbt").hidden=!RV.includes(f.view);$("#dbt").classList.toggle("on",r)}
+$("#sbt").onclick=()=>{SBO[f.view]=!sbOpen(f.view);render()};
+$("#dbt").onclick=()=>{DBO[f.view]=!detOpen(f.view);render()};
+/*BEPURE*/
+const BCOL=[["Cinza","#9b9a97"],["Marrom","#a1887f"],["Laranja","#d9a05b"],["Amarelo","#c9b458"],["Verde","#6f9a88"],["Azul","#6f93ae"],["Roxo","#8a7fb5"],["Rosa","#c487a5"],["Vermelho","#b0605c"]];
+const BT=[["text","¶","Texto"],["h1","H1","Título 1"],["h2","H2","Título 2"],["h3","H3","Título 3"],["bul","•","Lista com marcadores"],["num","1.","Lista numerada"],["todo","☑","Lista de tarefas"],["toggle","▸","Toggle"],["quote","❝","Citação"],["callout","💡","Callout"],["code","</>","Código"],["eq","∑","Equação"],["div","―","Divisor"],["img","🖼","Imagem"]];
+const SCRIPTBT=[["pag","▤","Página do roteiro"],["pan","▧","Painel"],["fala","◉","Fala / diálogo"],["leg","▤","Legenda"],["sfx","♫","SFX"],["nota","▱","Nota de roteiro"]];
+const BALIAS={h1:"heading 1 titulo 1",h2:"heading 2 titulo 2",h3:"heading 3 titulo 3",bul:"bullet marcadores",num:"numbered numbered list",todo:"checklist checkbox",eq:"math equation formula",callout:"destaque aviso",pag:"page pagina",pan:"panel",fala:"dialogue dialogo",leg:"caption",sfx:"sound effect",nota:"note anotacao"};
+const BIMG=/\.(png|jpe?g|gif|webp|svg|bmp)$/i,ICO=["💡","⚠️","📌","❗","✅","📝","🔥"];
+function bnum(B,i){let n=1;for(let j=i-1;j>=0;j--){if(B[j].ind>B[i].ind)continue;if(B[j].ind===B[i].ind&&B[j].t==="num")n++;else break}return n}
+function bparse(md,ctx={}){const L=md.replace(/\r/g,"").split("\n"),B=[];let dep=0;
+ for(let i=0;i<L.length;i++){const l=L[i];let x;
+  if(ctx.script&&!l.trim())continue;
+  if(ctx.script&&(x=l.match(/^## P[áa]gina\s+\d+(?:\s+[—-]\s+(.*))?$/))){B.push({t:"pag",txt:x[1]||"",ind:dep});continue}
+  if(ctx.script&&(x=l.match(/^### Painel\s+\d+(?:\s+[—-]\s+(.*))?$/))){B.push({t:"pan",txt:x[1]||"",ind:dep});continue}
+  if(ctx.script&&(x=l.match(/^> \[!quote\][ ]?(.*)$/))){B.push({t:"quote",txt:x[1],ind:dep});continue}
+  if(ctx.script&&(x=l.match(/^> \[!(\w+)\][ ]?(.*)$/))){const m=x[2].match(/^(\p{Extended_Pictographic}\uFE0F?)\s*(.*)$/u);B.push({t:"callout",ico:m?m[1]:"💡",txt:m?m[2]:x[2],ind:dep});continue}
+  if(ctx.script&&(x=l.match(/^> ?(.*)$/))){B.push({t:"nota",txt:x[1],ind:dep});continue}
+  if(ctx.script&&(x=l.match(/^FALA(?: \(([^)]*)\))?:\s*(.*)$/))){B.push({t:"fala",who:"",par:x[1]||"",txt:x[2],ind:dep});continue}
+  if(ctx.script&&(x=l.match(/^(LEGENDA|SFX):\s*(.*)$/))){B.push({t:x[1]==="SFX"?"sfx":"leg",txt:x[2],ind:dep});continue}
+  if(ctx.script&&(x=l.match(/^([^:()\n]{1,40}?)(?: \(([^)]*)\))?:\s+(.*)$/))&&x[1]===x[1].toUpperCase()&&/[A-ZÀ-Ú]/.test(x[1])){B.push({t:"fala",who:x[1].trim(),par:x[2]||"",txt:x[3],ind:dep});continue}
+  if(x=l.match(/^```(.*)$/)){const c=[];i++;while(i<L.length&&!/^```\s*$/.test(L[i]))c.push(L[i++]);B.push({t:"code",lang:x[1].trim(),txt:c.join("\n"),ind:dep});continue}
+  if(/^\$\$\s*$/.test(l)){const c=[];i++;while(i<L.length&&!/^\$\$\s*$/.test(L[i]))c.push(L[i++]);B.push({t:"eq",txt:c.join("\n"),ind:dep});continue}
+  if(x=l.match(/^<details( open)?><summary>(.*)<\/summary>\s*$/)){B.push({t:"toggle",txt:x[2],open:!!x[1],ind:dep});dep++;continue}
+  if(/^<\/details>\s*$/.test(l)){dep=Math.max(0,dep-1);continue}
+  const sp=l.match(/^( *)/)[1].length>>1;
+  if(x=l.match(/^ *- \[( |x)\] (.*)$/i))B.push({t:"todo",chk:x[1]!==" ",txt:x[2],ind:dep+sp});
+  else if(x=l.match(/^ *[-*] (.*)$/))B.push({t:"bul",txt:x[1],ind:dep+sp});
+  else if(x=l.match(/^ *\d+\. (.*)$/))B.push({t:"num",txt:x[1],ind:dep+sp});
+  else if(x=l.match(/^# (.*)$/))B.push({t:"h1",txt:x[1],ind:dep});
+  else if(x=l.match(/^## (.*)$/))B.push({t:"h2",txt:x[1],ind:dep});
+  else if(x=l.match(/^#{3,4} (.*)$/))B.push({t:"h3",txt:x[1],ind:dep});
+  else if(x=l.match(/^> \[!(\w+)\][ ]?(.*)$/)){const e=x[2].match(/^(\p{Extended_Pictographic}\uFE0F?)\s*(.*)$/u);B.push({t:"callout",ico:e?e[1]:"💡",txt:e?e[2]:x[2],ind:dep})}
+  else if(x=l.match(/^> (.*)$/))B.push({t:"quote",txt:x[1],ind:dep});
+  else if(/^(---+|\*\*\*+)\s*$/.test(l))B.push({t:"div",txt:"",ind:dep});
+  else if((x=l.match(/^!\[\[([^\]|]+)(?:\|[^\]]*)?\]\]\s*$/))&&BIMG.test(x[1].trim()))B.push({t:"img",txt:x[1].trim(),ind:dep});
+  else B.push({t:"text",txt:l,ind:dep})}
+ return B}
+function bser(B,ctx={}){const o=[],st=[];let page=0,panel=0;
+ B.forEach((b,i)=>{while(st.length&&b.ind<=st[st.length-1]){st.pop();o.push("</details>")}
+  const sp="  ".repeat(Math.max(0,b.ind-st.length)),t=b.txt||"";let line;
+  if(ctx.script&&b.t==="pag"){page++;panel=0;line=`## Página ${page}`+(t?` — ${t}`:"")}
+  else if(ctx.script&&b.t==="pan"){panel++;line=`### Painel ${panel}`+(t?` — ${t}`:"")}
+  else if(ctx.script&&b.t==="fala")line=`${(b.who||"FALA").toUpperCase()}${b.par?` (${b.par})`:""}: ${t}`;
+  else if(ctx.script&&b.t==="leg")line="LEGENDA: "+t;
+  else if(ctx.script&&b.t==="sfx")line="SFX: "+t;
+  else if(ctx.script&&b.t==="nota")line="> "+t;
+  else if(ctx.script&&b.t==="quote")line="> [!quote] "+t;
+  else line={text:()=>t,h1:()=>"# "+t,h2:()=>"## "+t,h3:()=>"#### "+t,bul:()=>sp+"- "+t,num:()=>sp+bnum(B,i)+". "+t,todo:()=>sp+"- ["+(b.chk?"x":" ")+"] "+t,quote:()=>"> "+t,callout:()=>"> [!note] "+(b.ico||"💡")+" "+t,code:()=>"```"+(b.lang||"")+"\n"+t+"\n```",eq:()=>"$$\n"+t+"\n$$",div:()=>"---",img:()=>"![["+t+"]]",toggle:()=>`<details${b.open?" open":""}><summary>${t}</summary>`}[b.t]();
+  o.push(line);
+  if(b.t==="toggle")st.push(b.ind)});
+ while(st.length){st.pop();o.push("</details>")}return o.join(ctx.script?"\n\n":"\n")}
+const bsafe=t=>{const m=t.match(/^<span style="([^"]*)">$/);if(!m)return t;const ok=m[1].split(";").map(p=>p.trim()).filter(p=>/^(color|background-color)\s*:\s*[#\w(),.\s%]+$/i.test(p));return ok.length?`<span style="${ok.join(";")}">`:"<span>"};
+function m2h(s){const keep=[];let x=String(s).replace(/<\/?u>|<span style="[^"]*">|<\/span>/g,m=>{keep.push(m);return"\u0001"+(keep.length-1)+"\u0002"});
+ x=esc(x).replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/(^|[^*])\*([^*]+)\*(?!\*)/g,"$1<i>$2</i>").replace(/~~(.+?)~~/g,"<s>$1</s>").replace(/\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g,(m,a,b)=>`<span class="wl" contenteditable="false" data-l="${a}">${b||a}</span>`);
+ return x.replace(/\u0001(\d+)\u0002/g,(m,i)=>bsafe(keep[+i]))}
+/*ENDBEPURE*/
+function h2m(n){let s="";n.childNodes.forEach(c=>{
+ if(c.nodeType===3){s+=c.data.replace(/\u200b/g,"")}
+ else if(c.nodeType===1){const t=c.tagName,x=h2m(c);
+  if(c.classList.contains("wl"))s+=`[[${c.dataset.l}${c.textContent!==c.dataset.l?"|"+c.textContent:""}]]`;
+  else if(t==="B"||t==="STRONG")s+=x?`**${x}**`:"";
+  else if(t==="I"||t==="EM")s+=x?`*${x}*`:"";
+  else if(t==="U")s+=x?`<u>${x}</u>`:"";
+  else if(t==="S"||t==="STRIKE"||t==="DEL")s+=x?`~~${x}~~`:"";
+  else if(t==="CODE")s+=c.textContent?"`"+c.textContent+"`":"";
+  else if(t==="BR")s+="";
+  else if(c.style&&(c.style.color||c.style.backgroundColor)&&x)s+=`<span style="${c.style.color?`color:${c.style.color};`:""}${c.style.backgroundColor?`background-color:${c.style.backgroundColor};`:""}">${x}</span>`;
+  else s+=x}});
+ return s}
+const IC=new Map();let BM=null;
+const bget=x=>{const el=x.closest(".be"),nb=x.closest(".nb");return{el,S:el.__be,i:+nb.dataset.i}};
+const bsync=S=>S.cb(bser(S.B,S.ctx));
+const caretPos=ed=>{const s=getSelection();if(!s.rangeCount)return -1;const r=s.getRangeAt(0).cloneRange();r.selectNodeContents(ed);r.setEnd(s.anchorNode,s.anchorOffset);return r.toString().length};
+function bfocus(el,i,end){const ed=el.querySelector(`.nb[data-i="${i}"] .ed`);if(!ed)return;ed.focus();const r=document.createRange();r.selectNodeContents(ed);r.collapse(!end);const s=getSelection();s.removeAllRanges();s.addRange(r)}
+function bmount(el,md,cb,ctx){const B=bparse(md,ctx);if(!B.length)B.push({t:"text",txt:"",ind:0});if(ctx&&ctx.script&&((B[B.length-1].t!=="text")||B[B.length-1].txt))B.push({t:"text",txt:"",ind:0});el.__be={B,cb,ctx,el};brender(el)}
+function brender(el){const S=el.__be,B=S.B,script=!!(S.ctx&&S.ctx.script),before=new Map([...el.querySelectorAll(".nb")].map(node=>[B[+node.dataset.i],node.getBoundingClientRect()]));let hide=null;
+ el.innerHTML=B.map((b,i)=>{if(hide!==null){if(b.ind>hide)return"";hide=null}
+  if(b.t==="toggle"&&!b.open)hide=b.ind;
+  const pre={bul:"•",num:bnum(B,i)+".",todo:`<input type="checkbox" class="ck2" ${b.chk?"checked":""}>`,toggle:`<span class="tg2">${b.open?"▾":"▸"}</span>`,callout:`<span class="ci">${b.ico||"💡"}</span>`,pag:"▤",pan:"▧",fala:"◉",leg:"▤",sfx:"♫",nota:"▱"}[b.t]||"",pl=b.t==="code"||b.t==="eq",txt=m2h(b.txt||""),ph=b.t==="text"?"Digite '/' para comandos ou '@' para mencionar":b.t==="pag"?"Título da página…":b.t==="pan"?"Descreva o enquadramento…":"Digite…";
+  let body=b.t==="div"?"<hr>":b.t==="img"?`<img class="bi" data-src="${esc(b.txt)}" alt="">`:`<div class="ed${pl?" pl":""}" contenteditable="true" data-ph="${ph}">${pl?esc(b.txt):txt}</div>`;
+  if(script&&b.t==="pag")body=`<span class="script-label">Página ${B.slice(0,i+1).filter(x=>x.t==="pag").length}</span>${body}`;
+  if(script&&b.t==="pan"){let count=0,start=0;for(let j=i;j>=0;j--)if(B[j].t==="pag"){start=j+1;break}for(let j=i+1;j<B.length&&B[j].t!=="pag"&&B[j].t!=="pan";j++)if(B[j].t==="fala"||B[j].t==="leg")count+=wc(B[j].txt||"");body=`<span class="script-label">Painel ${B.slice(start,i+1).filter(x=>x.t==="pan").length}</span>${body}<span class="script-count">${count} pal.</span>`}
+  if(script&&b.t==="fala")body=`<input class="script-who ${AL()[String(b.who||"").toUpperCase()]?"":"bad"}" data-script-field="who" list="dl-who" placeholder="PERSONAGEM" value="${esc(b.who||"")}"><input class="script-par" data-script-field="par" placeholder="(off, sussurro…)" value="${esc(b.par||"")}">${body}`;
+  if(script&&b.t==="leg")body=`<span class="script-label">Legenda</span>${body}`;
+  if(script&&b.t==="sfx")body=`<span class="script-label">SFX</span>${body}`;
+  if(script&&b.t==="nota")body=`<span class="script-label">Nota</span>${body}`;
+  return`<div class="nb t-${b.t}" data-i="${i}" style="margin-left:${b.ind*24}px"><span class="hd" draggable="true" title="Arraste para mover; clique para o menu">⋮⋮</span><span class="pre">${pre}</span>${body}</div>`}).join("");
+ if(!matchMedia("(prefers-reduced-motion: reduce)").matches)el.querySelectorAll(".nb").forEach((node,i)=>{const old=before.get(B[i]);if(!old||!node.animate)return;const now=node.getBoundingClientRect(),dx=old.left-now.left,dy=old.top-now.top;if(Math.abs(dx)>1||Math.abs(dy)>1)node.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"translate(0,0)"}],{duration:200,easing:"cubic-bezier(.2,.8,.2,1)"})});
+ el.querySelectorAll("img.bi").forEach(bimg)}
+async function bimg(im){const n=im.dataset.src,k=n.toLowerCase(),fail=m=>{const d=document.createElement("div");d.className="mut";d.textContent="🖼 "+n+" — "+m;im.replaceWith(d)};
+ if(IC.has(k)){im.src=IC.get(k);return}
+ if(!window.__TAURI__||!ROOTABS)return fail("as imagens aparecem no app desktop");
+ try{const u=await __TAURI__.core.invoke("read_asset",{root:ROOTABS,link:n});IC.set(k,u);im.src=u}catch(e){fail("arquivo não encontrado")}}
+const bnote=m=>{const s=$("#es")||$("#hs");if(s)s.textContent=m};
+function bpick(S,i){const inp=document.createElement("input");inp.type="file";inp.accept="image/*";inp.onchange=()=>{if(inp.files[0])bsave(inp.files[0],S,i)};inp.click()}
+async function bsave(file,S,i){
+ if(!window.__TAURI__||!ROOTABS){bnote("Imagens funcionam no app desktop.");return}
+ const ext=(file.name.split(".").pop()||"png").toLowerCase().replace(/[^a-z0-9]/g,""),name="img-"+Date.now()+"."+ext;
+ const b64=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(String(fr.result).split(",")[1]);fr.readAsDataURL(file)});
+ const dir=((S.ctx&&S.ctx.dir)||"").split("/").slice(1);
+ try{await __TAURI__.core.invoke("save_asset",{path:[ROOTABS,...dir,"dados",name].join("/"),b64})}catch(e){bnote("Não consegui salvar a imagem: "+e);return}
+ IC.set(name.toLowerCase(),"data:"+(file.type||"image/png")+";base64,"+b64);
+ const B=S.B,cur=B[i],nb={t:"img",txt:name,ind:cur?cur.ind:0};
+ if(cur&&cur.t==="text"&&!cur.txt)B.splice(i,1,nb);else B.splice(i+1,0,nb);
+ brender(S.el);bsync(S);bnote("imagem salva em dados/"+name)}
+function bmPos(m){m.style.left=Math.max(8,Math.min(BM.x,innerWidth-m.offsetWidth-8))+"px";m.style.top=Math.max(8,Math.min(BM.y,innerHeight-m.offsetHeight-8))+"px"}
+function bmEl(){let m=$("#bm");if(!m){m=document.createElement("div");m.id="bm";document.body.appendChild(m)}m.hidden=false;return m}
+function bmShow(r,items,kind){BM={items,sel:0,kind,ctx:null,x:r.left,y:r.bottom+4};bmDraw()}
+function bmDraw(){const m=bmEl();m.innerHTML=BM.items.map((it,i)=>`<div class="mi ${i===BM.sel?"on":""}" data-mi="${i}"><span>${it.ic}</span>${esc(it.l)}</div>`).join("");bmPos(m)}
+function bmRaw(x,y,html,ctx){BM={items:[],sel:0,kind:"raw",ctx,x,y};const m=bmEl();m.innerHTML=html;bmPos(m)}
+function bmHide(){BM=null;const m=$("#bm");if(m)m.hidden=true}
+const bsw=k=>`<h6>${k==="fg"?"Cor do texto":"Cor de fundo"}</h6><div><span class="sw" data-bc="${k}|" title="Padrão">∅</span>${BCOL.map(([n,h])=>`<span class="sw" data-bc="${k}|${h}" title="${n}" style="${k==="fg"?"color:"+h:"background:"+h+"40"}">${k==="fg"?"A":""}</span>`).join("")}</div>`;
+function bctx(x,y,el,S,i){const b=S.B[i],ed=b.t!=="div"&&b.t!=="img",types=BT.concat(S.ctx&&S.ctx.script?SCRIPTBT:[]);
+ bmRaw(x,y,(ed?`<h6>Transformar em</h6>${types.filter(t=>t[0]!=="div"&&t[0]!=="img").map(t=>`<div class="mi" data-bt="${t[0]}"><span>${t[1]}</span>${t[2]}</div>`).join("")}${bsw("fg")}${bsw("bg")}`:"")+`<h6>Bloco</h6><div class="mi" data-ba="dup"><span>⧉</span>Duplicar</div><div class="mi" data-ba="up"><span>↑</span>Mover para cima</div><div class="mi" data-ba="down"><span>↓</span>Mover para baixo</div><div class="mi" data-ba="del"><span>🗑</span>Excluir</div>`,{el,S,i})}
+function bexec(c,v){document.execCommand("styleWithCSS",false,c==="foreColor"||c==="hiliteColor");document.execCommand(c,false,v);const a=document.activeElement,ed=a&&a.closest&&a.closest(".be .ed");if(ed)binput(ed)}
+function bcolor(k,h){const c=BM&&BM.ctx;
+ if(c){const ed=c.el.querySelector(`.nb[data-i="${c.i}"] .ed`),s=getSelection();if(ed&&!(s.rangeCount&&!s.isCollapsed&&ed.contains(s.anchorNode))){ed.focus();document.execCommand("selectAll")}}
+ if(!h){document.execCommand("removeFormat");const a=document.activeElement,ed=a&&a.closest&&a.closest(".be .ed");if(ed)binput(ed)}else bexec(k==="bg"?"hiliteColor":"foreColor",k==="bg"?h+"40":h);
+ bmHide()}
+function bturn(el,S,i,t,clr){const b=S.B[i];bmHide();
+ if(clr)b.txt="";
+ if(t==="img"){bpick(S,i);return}
+ if(t==="div"){b.t="div";b.txt="";S.B.splice(i+1,0,{t:"text",txt:"",ind:b.ind});brender(el);bsync(S);bfocus(el,i+1);return}
+ b.t=t;if(t==="callout"&&!b.ico)b.ico="💡";if(t==="toggle")b.open=true;if(t==="todo")b.chk=!!b.chk;if(t==="fala"){b.who=b.who||"";b.par=b.par||""}
+ brender(el);bsync(S);bfocus(el,i,1)}
+function bsplit(el,S,i,ed){const b=S.B[i],s=getSelection();if(!s.isCollapsed)document.execCommand("delete");
+ const r=s.getRangeAt(0),tail=r.cloneRange();tail.selectNodeContents(ed);tail.setStart(r.endContainer,r.endOffset);
+ const d=document.createElement("div");d.appendChild(tail.extractContents());const rest=h2m(d);b.txt=h2m(ed);
+ if(!b.txt&&!rest&&["bul","num","todo","quote","callout"].includes(b.t)){b.t="text";brender(el);bsync(S);bfocus(el,i);return}
+ const nt=S.ctx&&S.ctx.script?({pag:"pan",pan:"desc",desc:"fala",fala:"fala",leg:"desc",sfx:"desc",nota:"desc"}[b.t]||"text"):({bul:"bul",num:"num",todo:"todo"}[b.t]||"text"),nb={t:nt,txt:rest,ind:b.t==="toggle"&&b.open?b.ind+1:b.ind};if(nt==="todo")nb.chk=false;if(nt==="fala"){nb.who="";nb.par=""}
+ S.B.splice(i+1,0,nb);brender(el);bsync(S);bfocus(el,i+1)}
+function inlineMd(ed){const s=getSelection();if(!s.rangeCount||!s.isCollapsed)return;const n=s.anchorNode;if(!n||n.nodeType!==3)return;const t=n.data.slice(0,s.anchorOffset);
+ for(const[r,tag]of[[/\*\*([^*]+)\*\*$/,"b"],[/~~([^~]+)~~$/,"s"],[/`([^`]+)`$/,"code"],[/(?:^|[^*])\*([^*]+)\*$/,"i"]]){const m=t.match(r);if(m){const full=tag==="i"?"*"+m[1]+"*":m[0],rg=document.createRange();rg.setStart(n,s.anchorOffset-full.length);rg.setEnd(n,s.anchorOffset);s.removeAllRanges();s.addRange(rg);document.execCommand("insertHTML",false,`<${tag}>${esc(m[1])}</${tag}>&#8203;`);return}}}
+const SCUT=[[/^#\s$/,"h1"],[/^##\s$/,"h2"],[/^###\s$/,"h3"],[/^[-*]\s$/,"bul"],[/^1\.\s$/,"num"],[/^\[\]\s$/,"todo"],[/^>\s$/,"quote"],[/^```$/,"code"]];
+function binput(ed){const{el,S,i}=bget(ed),b=S.B[i];
+ if(b.t==="code"||b.t==="eq"){b.txt=ed.innerText.replace(/\n$/,"");bsync(S);return}
+ const tx=ed.textContent.replace(/\u200b/g,"");
+ if(b.t==="text"){const h=SCUT.find(([r])=>r.test(tx));if(h){b.t=h[1];b.txt="";if(h[1]==="todo")b.chk=false;brender(el);bsync(S);bfocus(el,i);return}}
+ inlineMd(ed);b.txt=h2m(ed);bsync(S);
+ const sl=b.t==="text"&&tx.match(/^\/(\S*)$/);
+ if(sl){const q=sl[1].toLowerCase(),types=BT.concat(S.ctx&&S.ctx.script?SCRIPTBT:[]),it=types.filter(x=>(x[2]+x[0]+(BALIAS[x[0]]||"")).toLowerCase().includes(q)).map(x=>({ic:x[1],l:x[2],fn:()=>bturn(el,S,i,x[0],1)}));
+  if("color cores".includes(q)||!q)it.push({ic:"A",l:"Cores de texto e destaque",fn:()=>{bturn(el,S,i,"text",1);const target=el.querySelector(`.nb[data-i="${i}"] .ed`),r=target.getBoundingClientRect();bmRaw(r.left,r.bottom+4,bsw("fg")+bsw("bg"),{el,S,i})}});
+  if(it.length){bmShow(ed.getBoundingClientRect(),it,"slash");return}}
+ const s=getSelection();
+ if(s.rangeCount&&s.anchorNode&&s.anchorNode.nodeType===3){const t=s.anchorNode.data.slice(0,s.anchorOffset),m=t.match(/@([^\s@]*)$/);
+  if(m){const q=m[1].toLowerCase(),it=(VT?VT.notes.filter(n=>["personagem","trama","capitulo","org","local"].includes(n.tipo)&&n.name.toLowerCase().includes(q)).slice(0,8).map(n=>({ic:"↗",l:n.name,fn:()=>bins(m[0],`<span class="wl" contenteditable="false" data-l="${esc(n.name)}">${esc(n.name)}</span>&#8203;`)})):[]);
+   for(const[l,d]of[["Hoje",0],["Amanhã",1]])if(!q||l.toLowerCase().startsWith(q))it.push({ic:"📅",l,fn:()=>bins(m[0],new Date(Date.now()+d*864e5).toISOString().slice(0,10)+" ")});
+   if(it.length){bmShow(s.getRangeAt(0).getBoundingClientRect(),it,"at");return}}}
+ if(BM&&(BM.kind==="slash"||BM.kind==="at"))bmHide()}
+function bins(typed,html){const s=getSelection(),n=s.anchorNode,o=s.anchorOffset,r=document.createRange();r.setStart(n,o-typed.length);r.setEnd(n,o);s.removeAllRanges();s.addRange(r);document.execCommand("insertHTML",false,html);const a=document.activeElement;if(a&&a.closest&&a.closest(".be .ed"))binput(a.closest(".be .ed"))}
+function bfmt(c,btn){const s=getSelection();if(!s.rangeCount)return;const e0=s.anchorNode.nodeType===3?s.anchorNode.parentElement:s.anchorNode,ed=e0.closest(".be .ed");if(!ed)return;
+ if(["bold","italic","underline","strikeThrough"].includes(c))bexec(c);
+ else if(c==="code"){document.execCommand("insertHTML",false,`<code>${esc(s.toString())}</code>&#8203;`);binput(ed)}
+ else if(c==="color"){const r=btn.getBoundingClientRect();bmRaw(r.left,r.bottom+4,bsw("fg")+bsw("bg"),null)}
+ else if(c==="turn"){const g=bget(ed),r=btn.getBoundingClientRect(),types=BT.concat(g.S.ctx&&g.S.ctx.script?SCRIPTBT:[]);bmShow(r,types.filter(x=>!["img","div"].includes(x[0])).map(x=>({ic:x[1],l:x[2],fn:()=>bturn(g.el,g.S,g.i,x[0])})),"turn")}}
+document.body.insertAdjacentHTML("beforeend",'<div id="bt" hidden><button data-bf="turn">Texto ▾</button><button data-bf="bold"><b>B</b></button><button data-bf="italic"><i>I</i></button><button data-bf="underline"><u>U</u></button><button data-bf="strikeThrough"><s>S</s></button><button data-bf="code">&lt;/&gt;</button><button data-bf="color">A ▾</button></div>');
+document.addEventListener("selectionchange",()=>{const bt=$("#bt"),s=getSelection();let ok=false;
+ if(s.rangeCount&&!s.isCollapsed&&s.anchorNode){const e0=s.anchorNode.nodeType===3?s.anchorNode.parentElement:s.anchorNode;ok=!!(e0&&e0.closest&&e0.closest(".be .ed:not(.pl)"))}
+ if(!ok){bt.hidden=true;return}
+ const r=s.getRangeAt(0).getBoundingClientRect();bt.hidden=false;bt.style.left=Math.max(8,Math.min(innerWidth-bt.offsetWidth-8,r.left+r.width/2-bt.offsetWidth/2))+"px";bt.style.top=Math.max(8,r.top-bt.offsetHeight-8)+"px"});
+document.addEventListener("mousedown",e=>{if(e.target.closest("#bm,#bt")){if(!e.target.closest("input"))e.preventDefault()}else if(BM)bmHide()});
+document.addEventListener("input",e=>{const ed=e.target.closest&&e.target.closest(".be .ed");if(ed)binput(ed)});
+document.addEventListener("input",e=>{const input=e.target.closest&&e.target.closest(".be.script-editor [data-script-field]");if(!input)return;const nb=input.closest(".nb"),be=input.closest(".be"),S=be.__be;S.B[+nb.dataset.i][input.dataset.scriptField]=input.value;input.classList.toggle("bad",input.dataset.scriptField==="who"&&!AL()[input.value.toUpperCase()]);bsync(S)});
+document.addEventListener("keydown",e=>{const ed=e.target.closest&&e.target.closest(".be .ed");if(!ed)return;const{el,S,i}=bget(ed),b=S.B[i],n=BM&&BM.items.length;
+ if(n&&["ArrowDown","ArrowUp","Enter","Escape","Tab"].includes(e.key)){e.preventDefault();if(e.key==="Escape")return bmHide();if(e.key==="ArrowDown")BM.sel=(BM.sel+1)%n;else if(e.key==="ArrowUp")BM.sel=(BM.sel+n-1)%n;else{const it=BM.items[BM.sel];bmHide();it.fn();return}bmDraw();return}
+ const code=b.t==="code"||b.t==="eq",s=getSelection(),pos=s.isCollapsed?caretPos(ed):-1;
+ if(S.ctx&&S.ctx.script&&e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();const add=e.shiftKey?[{t:"pag",txt:"",ind:b.ind},{t:"pan",txt:"",ind:b.ind}]:[{t:"pan",txt:"",ind:b.ind}];S.B.splice(i+1,0,...add);brender(el);bsync(S);bfocus(el,i+1);return}
+ if(e.key==="Enter"&&code&&(e.ctrlKey||e.metaKey)){e.preventDefault();S.B.splice(i+1,0,{t:"text",txt:"",ind:b.ind});brender(el);bsync(S);bfocus(el,i+1);return}
+ if(e.key==="Enter"&&!e.shiftKey&&!code){e.preventDefault();bsplit(el,S,i,ed);return}
+ if(e.key==="Tab"){e.preventDefault();b.ind=Math.max(0,Math.min(6,b.ind+(e.shiftKey?-1:1)));brender(el);bsync(S);bfocus(el,i,1);return}
+ if(e.key==="Backspace"&&pos===0){e.preventDefault();
+  if(b.t!=="text"){b.t="text";brender(el);bsync(S);bfocus(el,i);return}
+  if(i>0){const p=S.B[i-1];if(["code","eq"].includes(p.t))return;
+   if(["div","img"].includes(p.t)){S.B.splice(i-1,1);brender(el);bsync(S);bfocus(el,i-1);return}
+   p.txt=p.txt+"\u2063"+b.txt;S.B.splice(i,1);brender(el);const e2=el.querySelector(`.nb[data-i="${i-1}"] .ed`),w=document.createTreeWalker(e2,NodeFilter.SHOW_TEXT);let t;
+   while(t=w.nextNode()){const k=t.data.indexOf("\u2063");if(k>=0){t.data=t.data.replace("\u2063","");e2.focus();const r=document.createRange();r.setStart(t,k);r.collapse(true);const s2=getSelection();s2.removeAllRanges();s2.addRange(r);break}}
+   p.txt=h2m(e2);bsync(S)}
+  return}
+ const jump=dir=>{let q=ed.closest(".nb")[dir];while(q&&!q.querySelector(".ed"))q=q[dir];if(q){e.preventDefault();const t=q.querySelector(".ed");t.focus();const r=document.createRange();r.selectNodeContents(t);r.collapse(dir==="nextElementSibling");s.removeAllRanges();s.addRange(r)}};
+ if(e.key==="ArrowUp"&&pos===0)jump("previousElementSibling");
+ if(e.key==="ArrowDown"&&pos===ed.textContent.length&&pos>=0)jump("nextElementSibling")});
+document.addEventListener("paste",e=>{const ed=e.target.closest&&e.target.closest(".be .ed");if(!ed)return;const{el,S,i}=bget(ed),cd=e.clipboardData,fl=[...cd.files].find(x=>/^image\//.test(x.type));e.preventDefault();
+ if(fl)return bsave(fl,S,i);const t=cd.getData("text/plain");if(!t)return;
+ if(!t.includes("\n")){document.execCommand("insertText",false,t);return}
+ const b=S.B[i],P=bparse(t).map(x=>({...x,ind:x.ind+b.ind})),empty=!ed.textContent.trim();S.B.splice(empty?i:i+1,empty?1:0,...P);brender(el);bsync(S);bfocus(el,Math.min(S.B.length-1,i+P.length-(empty?1:0)),1)});
+document.addEventListener("dragstart",e=>{const hd=e.target.closest&&e.target.closest(".be .hd");if(!hd)return;const{S,i}=bget(hd);S.drag=i;hd.closest(".nb").classList.add("dragging");e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain","be")});
+document.addEventListener("dragover",e=>{if(!(e.target.closest&&e.target.closest(".be")))return;e.preventDefault();document.querySelectorAll(".nb.dov,.nb.dov2").forEach(x=>x.classList.remove("dov","dov2"));const nb=e.target.closest(".nb");if(nb)nb.classList.add(e.clientY>nb.getBoundingClientRect().top+nb.offsetHeight/2?"dov2":"dov")});
+document.addEventListener("dragend",()=>document.querySelectorAll(".nb.dragging,.nb.dov,.nb.dov2").forEach(x=>x.classList.remove("dragging","dov","dov2")));
+document.addEventListener("drop",e=>{const be=e.target.closest&&e.target.closest(".be");if(!be)return;e.preventDefault();document.querySelectorAll(".nb.dov,.nb.dov2").forEach(x=>x.classList.remove("dov","dov2"));
+ const S=be.__be,nb=e.target.closest(".nb"),j=nb?+nb.dataset.i:S.B.length-1,after=nb?e.clientY>nb.getBoundingClientRect().top+nb.offsetHeight/2:true,fl=[...(e.dataTransfer.files||[])].find(x=>/^image\//.test(x.type));
+ if(fl)return bsave(fl,S,j);if(S.drag==null)return;const from=S.drag;S.drag=null;const[m]=S.B.splice(from,1);let to=j+(after?1:0);if(from<to)to--;S.B.splice(to,0,m);brender(be);const moved=be.querySelector(`.nb[data-i="${S.B.indexOf(m)}"]`);if(moved&&!matchMedia("(prefers-reduced-motion: reduce)").matches){moved.classList.add("dropped");moved.addEventListener("animationend",()=>moved.classList.remove("dropped"),{once:true})}bsync(S)});
+document.addEventListener("contextmenu",e=>{const row=e.target.closest&&e.target.closest(".np-row"),explorer=e.target.closest&&e.target.closest(".np-explorer");
+ if(explorer){e.preventDefault();bmRaw(e.clientX,e.clientY,row?`<h6>${esc(row.querySelector("b")?.textContent||"Página")}</h6><div class="mi" data-np-openctx="${esc(row.dataset.id)}"><span>↗</span>Abrir página</div><div class="mi" data-np-child="${esc(row.dataset.id)}"><span>＋</span>Criar subpágina</div><div class="mi" data-np-deletectx="${esc(row.dataset.id)}"><span>×</span>Excluir página e subpáginas</div>`:'<h6>Explorer</h6><div class="mi" data-np-newctx><span>＋</span>Nova página</div>',null);return}
+ const item=e.target.closest&&e.target.closest("[data-ho],[data-eo]");if(item&&VT){const chapterPath=item.dataset.ho,chapter=chapterPath&&VT.map.get(chapterPath),route=chapter&&hfind(chapter.name),path=item.dataset.eo,meta=path&&VT.map.get(path);
+  if(chapterPath){e.preventDefault();const html=route?`<h6>${esc(route.name)}</h6><div class="mi" data-note-route="${esc(chapterPath)}"><span>↗</span>Abrir roteiro</div><div class="mi" data-note-delete="${esc(route.path)}"><span>×</span>Excluir roteiro</div>`:`<h6>${esc(chapter?.name||"Roteiro")}</h6><div class="mi" data-note-route="${esc(chapterPath)}"><span>＋</span>Criar/abrir roteiro</div><div class="mi" data-chapter-delete="${esc(chapterPath)}"><span>×</span>Excluir capítulo</div>`;bmRaw(e.clientX,e.clientY,html,null);return}
+  if(meta){e.preventDefault();bmRaw(e.clientX,e.clientY,`<h6>${esc(meta.name)}</h6><div class="mi" data-note-open="${esc(path)}"><span>↗</span>Abrir nota</div><div class="mi" data-note-duplicate="${esc(path)}"><span>⧉</span>Duplicar nota</div><div class="mi" data-note-delete="${esc(path)}"><span>×</span>Excluir nota</div>`,null);return}}
+ const be=e.target.closest&&e.target.closest(".be");if(!be||!be.__be)return;e.preventDefault();const nb=e.target.closest(".nb"),S=be.__be,i=nb?+nb.dataset.i:Math.max(0,S.B.length-1);bctx(e.clientX,e.clientY,be,S,i)});
+document.addEventListener("click",e=>{const t=e.target,mi=t.closest("#bm [data-mi]");
+ if(mi&&BM){const it=BM.items[+mi.dataset.mi];bmHide();it.fn();return}
+ const np=t.closest("#bm [data-np-newctx],#bm [data-np-openctx],#bm [data-np-child],#bm [data-np-deletectx]");if(np&&BM){const id=np.dataset.npChild||np.dataset.npOpenctx||np.dataset.npDeletectx||"",create=np.hasAttribute("data-np-newctx")||np.hasAttribute("data-np-child");bmHide();if(create)npCreate(id);else if(np.hasAttribute("data-np-deletectx"))npRemove(id);else{NPSEL=id;npSave();f.view="pages";render()}return}
+ const action=t.closest("#bm [data-note-route],#bm [data-note-open],#bm [data-note-duplicate],#bm [data-note-delete],#bm [data-chapter-delete]");if(action&&BM){const d=action.dataset;bmHide();if(d.noteRoute)hopen(d.noteRoute);else if(d.noteOpen)ego(d.noteOpen);else if(d.noteDuplicate)vaultDuplicate(d.noteDuplicate);else if(d.noteDelete||d.chapterDelete)vaultDelete(d.noteDelete||d.chapterDelete);return}
+ const bt=t.closest("#bm [data-bt]");if(bt&&BM&&BM.ctx){const{el,S,i}=BM.ctx;bmHide();bturn(el,S,i,bt.dataset.bt);return}
+ const bc=t.closest("#bm [data-bc]");if(bc){const[k,h]=bc.dataset.bc.split("|");bcolor(k,h);return}
+ const ba=t.closest("#bm [data-ba]");if(ba&&BM&&BM.ctx){const{el,S,i}=BM.ctx,a=ba.dataset.ba,B=S.B;bmHide();
+  if(a==="dup")B.splice(i+1,0,{...B[i]});else if(a==="up"&&i>0)[B[i-1],B[i]]=[B[i],B[i-1]];else if(a==="down"&&i<B.length-1)[B[i+1],B[i]]=[B[i],B[i+1]];else if(a==="del"){B.splice(i,1);if(!B.length)B.push({t:"text",txt:"",ind:0})}
+  brender(el);bsync(S);return}
+ const bf=t.closest("#bt [data-bf]");if(bf)return bfmt(bf.dataset.bf,bf);
+ const wl=t.closest(".be .wl");if(wl&&VT){const n=VT.notes.find(x=>x.name===wl.dataset.l);if(n)ego(n.path);return}
+ const ck=t.closest(".be .ck2");if(ck){const{S,i}=bget(ck);S.B[i].chk=ck.checked;bsync(S);return}
+ const tg=t.closest(".be .tg2");if(tg){const{el,S,i}=bget(tg);S.B[i].open=!S.B[i].open;brender(el);bsync(S);return}
+ const ci=t.closest(".be .ci");if(ci){const{el,S,i}=bget(ci),b=S.B[i];b.ico=ICO[(ICO.indexOf(b.ico)+1)%ICO.length];brender(el);bsync(S);return}
+ const hd=t.closest(".be .hd");if(hd){const{el,S,i}=bget(hd),r=hd.getBoundingClientRect();bctx(r.left,r.bottom+2,el,S,i)}});
+function bmountAll(){document.querySelectorAll(".be[data-be]").forEach(el=>{if(el.__be||!ED)return;const k=el.dataset.be,pre=k==="pre",s=pre?null:ED.secs[+k.slice(1)];
+ bmount(el,pre?ED.pre:s.body,md=>{if(pre)ED.pre=md;else{s.body=md;s.dirty=1}ED.dirty=1;const m=$("#es");if(m)m.textContent="alterações não salvas"},{dir:ED.path.split("/").slice(0,-1).join("/")})})}
+function gfBuild(){
+ const ty=[["p","Personagens","●"],["c","Capítulos","■"],["t","Tramas","◆"],["s","Séries","★"],["l","Locais e organizações","▲"]];
+ const it={p:C.map(x=>["p:"+x.id,x.id]),c:CH.map(c=>["c:"+c.n,"#"+c.n+" "+c.t]),t:Object.entries(T).map(([k,v])=>["t:"+k,v]),s:Object.entries(SN).map(([k,v])=>["s:"+k,v]),l:ALL_L.map(l=>["l:"+l,l])};
+ $("#gf").innerHTML="<h5>Mostrar no grafo</h5>"+ty.map(([k,n,g])=>`<div class="ty"><label class="ck"><input type="checkbox" data-ty="${k}" ${f.ty[k]?"checked":""}>${g} ${n}</label><details><summary>escolher itens (${it[k].length})</summary><button type="button" data-all="${k}">todos</button><button type="button" data-none="${k}">nenhum</button>${it[k].map(([id,l])=>`<label class="ck"><input type="checkbox" data-it="${id}" checked>${l}</label>`).join("")}</details></div>`).join("")+"<h5>Conexões</h5>"+Object.entries(LKS).map(([k,v])=>`<label class="ck"><input type="checkbox" data-lk="${k}" ${f.lk[k]?"checked":""}><span style="color:${v[1]}">●</span>${v[0]}</label>`).join("")+`<label class="ck"><input type="checkbox" data-iso ${f.iso?"checked":""}>Ocultar nós sem conexão</label>`;
+}
+$("#gf").addEventListener("change",e=>{const t=e.target.dataset;
+ if(t.ty)f.ty[t.ty]=+e.target.checked;else if(t.lk)f.lk[t.lk]=+e.target.checked;else if("iso" in t)f.iso=+e.target.checked;
+ else if(t.it)e.target.checked?f.hid.delete(t.it):f.hid.add(t.it);render()});
+$("#gf").addEventListener("click",e=>{const a=e.target.dataset,k=a.all||a.none;if(!k)return;
+ document.querySelectorAll(`[data-it^="${k}:"]`).forEach(i=>{i.checked=!!a.all;i.checked?f.hid.delete(i.dataset.it):f.hid.add(i.dataset.it)});render()});
+gfBuild();
+render();
+</script></body></html>
