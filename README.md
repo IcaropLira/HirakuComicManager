@@ -29,5 +29,5 @@ O atualizador silencioso do app ainda precisa do plugin Tauri Updater e de uma c
 - Fedora e derivados: instale o `.rpm` para registrar o app no menu.
 - AppImage: opção portátil; permita execução e abra o arquivo diretamente.
 
-Os instaladores são gerados quando uma tag corresponde à versão em `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml` e `package.json`. Exemplo para a versão atual: `git tag v0.1.0 && git push origin v0.1.0`.
+O workflow aplica a versão da tag a `src-tauri/tauri.conf.json`, `src-tauri/Cargo.toml` e `package.json` antes de compilar. Exemplo de publicação: `git tag v0.1.1 && git push origin v0.1.1`.
 
