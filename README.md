@@ -14,13 +14,27 @@ Na aba Git, conecte o remoto do Vault. Para autenticação HTTPS, configure o Gi
 
 Para começar um projeto, informe o URL do repositório GitHub em **Clonar projeto** na Home e escolha a pasta pai. Se o repositório for privado, faça `gh auth login` antes de clonar. Para um Vault já clonado, configure `origin` na aba Git.
 
-O botão de sincronização faz `fetch` e `pull --rebase --autostash`, depois envia o branch atual. Conflitos interrompem a sincronização para resolução manual. O modo automático é opcional e sincroniza ao salvar notas.
+O botão de sincronização faz `fetch` e `pull --rebase --autostash`, depois envia o branch atual. Se houver conflito de merge, o app desfaz o rebase (seu Vault não fica com marcadores `<<<<<<<`) e avisa quais arquivos conflitaram.
+
+Com **Automático** ligado na aba Git:
+- ao salvar uma nota o app puxa o remoto, faz commit e push;
+- a cada minuto (e ao voltar o foco para a janela) o app consulta o remoto. Se alguém enviou commits, aparece um aviso e, se você não estiver com um editor aberto, o pull/merge é feito sozinho e o Vault recarrega. Com um editor aberto, o aviso fica até você salvar e sair.
+Com o modo desligado, o aviso aparece com o botão **Puxar e mesclar**.
 
 ## Releases
 
 Envie uma tag `v*` para publicar artefatos para Linux (DEB, RPM e AppImage), Windows (MSI e NSIS) e macOS (DMG). O workflow cria o GitHub Release automaticamente.
 
-O atualizador silencioso do app ainda precisa do plugin Tauri Updater e de uma chave de assinatura configurada como secret do GitHub Actions. Flatpak também requer manifesto e publicação próprios; o workflow atual não gera `.flatpak`.
+### Atualização automática do app
+
+O app verifica novas versões ao abrir (e a cada 6 h) e mostra um aviso com **Atualizar agora**; também há "Verificar atualizações" no rodapé. Configuração única:
+
+1. `npx tauri signer generate -w ~/.tauri/hiraku.key` (guarde a chave privada e a senha).
+2. Cole a **chave pública** em `src-tauri/tauri.conf.json` → `plugins.updater.pubkey` (hoje há um texto de exemplo no lugar).
+3. No GitHub: *Settings → Secrets and variables → Actions* e crie `TAURI_SIGNING_PRIVATE_KEY` (conteúdo da chave privada) e `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`.
+4. Publique com uma tag `v*`. O workflow assina os instaladores e envia o `latest.json` ao Release, que é o endereço consultado pelos apps instalados.
+
+Sem a chave pública correta o app abre normalmente, mas a verificação de atualização falha. A atualização silenciosa vale para Windows (NSIS/MSI), macOS e AppImage; instalações `.deb`/`.rpm` precisam ser atualizadas pelo gerenciador do sistema. Flatpak requer manifesto e publicação próprios.
 
 ### Instalação
 

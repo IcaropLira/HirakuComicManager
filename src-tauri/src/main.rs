@@ -98,6 +98,10 @@ fn git(root: &str, args: &[&str]) -> Result<String, String> {
     let o = Command::new("git")
         .args(args)
         .current_dir(root)
+        // nunca travar esperando usuário/senha no terminal: falha com erro claro
+        .env("GIT_TERMINAL_PROMPT", "0")
+        // mensagens do git em inglês: o app compara textos como "No such remote"
+        .env("LC_ALL", "C")
         .output()
         .map_err(|e| format!("Não consegui executar o git: {}", e))?;
     let out = String::from_utf8_lossy(&o.stdout).to_string();
@@ -222,6 +226,10 @@ fn git_commit(root: String, msg: String) -> Result<String, String> {
         let _ = fs::write(&gi, format!("{}{}*.bak\n", atual, sep));
     }
     git(&root, &["add", "-A", "--", "."])?;
+    // nada para commitar não é erro (senão o push automático seria pulado)
+    if git(&root, &["diff", "--cached", "--quiet"]).is_ok() {
+        return Ok("Nada para commitar".into());
+    }
     git(&root, &["commit", "-m", &msg])
 }
 
@@ -238,10 +246,85 @@ fn git_pull(root: String) -> Result<String, String> {
     if branch == "HEAD" || branch.is_empty() {
         return Err("Faça um commit local antes de sincronizar este repositório".into());
     }
-    git(
+    // remoto ainda sem este branch (primeiro push): não há o que puxar
+    if git(
+        &root,
+        &["rev-parse", "--verify", "--quiet", &format!("refs/remotes/origin/{}", branch)],
+    )
+    .is_err()
+    {
+        return Ok("O remoto ainda não tem este branch; nada para puxar".into());
+    }
+    match git(
         &root,
         &["pull", "--rebase", "--autostash", "origin", branch],
-    )
+    ) {
+        Ok(out) => Ok(out),
+        Err(err) => {
+            // conflito: desfaz o rebase para o Vault não ficar com marcadores <<<<<<<
+            let conflitos = git(&root, &["diff", "--name-only", "--diff-filter=U"])
+                .unwrap_or_default()
+                .trim()
+                .replace('\n', ", ");
+            let _ = git(&root, &["rebase", "--abort"]);
+            if conflitos.is_empty() {
+                Err(err)
+            } else {
+                Err(format!(
+                    "Conflito de merge em: {}. Nada foi alterado no seu Vault; resolva fora do app (git pull --rebase) ou combine com quem editou o mesmo arquivo.",
+                    conflitos
+                ))
+            }
+        }
+    }
+}
+
+#[derive(Serialize)]
+struct RemoteState {
+    remote: bool,
+    branch: String,
+    ahead: u32,
+    behind: u32,
+    dirty: bool,
+}
+
+/// Busca o remoto e diz quantos commits o Vault local está atrás/à frente.
+#[tauri::command]
+fn git_check_remote(root: String) -> Result<RemoteState, String> {
+    let vazio = RemoteState {
+        remote: false,
+        branch: String::new(),
+        ahead: 0,
+        behind: 0,
+        dirty: false,
+    };
+    if git(&root, &["remote", "get-url", "origin"]).is_err() {
+        return Ok(vazio);
+    }
+    git(&root, &["fetch", "origin"])?;
+    let branch = git(&root, &["rev-parse", "--abbrev-ref", "HEAD"])?
+        .trim()
+        .to_string();
+    if branch == "HEAD" || branch.is_empty() {
+        return Ok(vazio);
+    }
+    let dirty = !git(&root, &["status", "--porcelain"])?.trim().is_empty();
+    let range = format!("{}...origin/{}", branch, branch);
+    let (ahead, behind) = match git(&root, &["rev-list", "--left-right", "--count", &range]) {
+        Ok(s) => {
+            let mut it = s.split_whitespace().map(|n| n.parse::<u32>().unwrap_or(0));
+            (it.next().unwrap_or(0), it.next().unwrap_or(0))
+        }
+        // branch ainda não existe no remoto
+        Err(_) => (0, 0),
+    };
+    Ok(RemoteState {
+        remote: true,
+        branch,
+        ahead,
+        behind,
+        dirty,
+    })
 }
 
 #[tauri::command]
@@ -360,6 +443,8 @@ fn main() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             list_md,
             write_md,
@@ -374,6 +459,7 @@ fn main() {
             git_commit,
             git_push,
             git_pull,
+            git_check_remote,
             git_sync,
             save_asset,
             read_asset
