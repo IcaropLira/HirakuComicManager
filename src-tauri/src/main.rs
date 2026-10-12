@@ -1,7 +1,11 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use serde::Serialize;
 use base64::{engine::general_purpose::STANDARD, Engine};
-use std::{fs, path::{Component, Path, PathBuf}, process::Command};
+use serde::Serialize;
+use std::{
+    fs,
+    path::{Component, Path, PathBuf},
+    process::Command,
+};
 
 #[derive(Serialize)]
 struct Arq {
@@ -21,8 +25,15 @@ fn varrer(base: &Path, dir: &Path, raiz: &str, saida: &mut Vec<Arq>) {
                 varrer(base, &p, raiz, saida);
             } else if nome.to_lowercase().ends_with(".md") {
                 if let Ok(texto) = fs::read_to_string(&p) {
-                    let rel = p.strip_prefix(base).unwrap().to_string_lossy().replace('\\', "/");
-                    saida.push(Arq { path: format!("{}/{}", raiz, rel), text: texto });
+                    let rel = p
+                        .strip_prefix(base)
+                        .unwrap()
+                        .to_string_lossy()
+                        .replace('\\', "/");
+                    saida.push(Arq {
+                        path: format!("{}/{}", raiz, rel),
+                        text: texto,
+                    });
                 }
             }
         }
@@ -57,7 +68,12 @@ fn delete_md(root: String, path: String) -> Result<(), String> {
     let base = Path::new(&root).canonicalize().map_err(|e| e.to_string())?;
     let relative = Path::new(&path);
     if relative.is_absolute()
-        || relative.components().any(|part| matches!(part, Component::ParentDir | Component::RootDir | Component::Prefix(_)))
+        || relative.components().any(|part| {
+            matches!(
+                part,
+                Component::ParentDir | Component::RootDir | Component::Prefix(_)
+            )
+        })
     {
         return Err("Caminho inválido para exclusão".into());
     }
@@ -67,13 +83,16 @@ fn delete_md(root: String, path: String) -> Result<(), String> {
     if !metadata.is_file()
         || metadata.file_type().is_symlink()
         || !target.starts_with(&base)
-        || target.extension().and_then(|ext| ext.to_str()).map(|ext| ext.eq_ignore_ascii_case("md")) != Some(true)
+        || target
+            .extension()
+            .and_then(|ext| ext.to_str())
+            .map(|ext| ext.eq_ignore_ascii_case("md"))
+            != Some(true)
     {
         return Err("Só é permitido excluir arquivos Markdown dentro do Vault".into());
     }
     fs::remove_file(candidate).map_err(|e| e.to_string())
 }
-
 
 fn git(root: &str, args: &[&str]) -> Result<String, String> {
     let o = Command::new("git")
@@ -95,9 +114,93 @@ fn git_status(root: String) -> Result<String, String> {
     git(&root, &["status", "--porcelain", "-b"])
 }
 
+fn github_repo_path(url: &str) -> Option<&str> {
+    url.strip_prefix("https://github.com/")
+        .or_else(|| url.strip_prefix("git@github.com:"))
+}
+
+fn valid_github_repo_url(url: &str) -> bool {
+    let Some(path) = github_repo_path(url.trim()) else {
+        return false;
+    };
+    let path = path.strip_suffix(".git").unwrap_or(path);
+    let mut parts = path.split('/');
+    matches!((parts.next(), parts.next(), parts.next()), (Some(owner), Some(repo), None) if !owner.is_empty() && !repo.is_empty())
+        && !url.chars().any(char::is_whitespace)
+}
+
+#[tauri::command]
+fn git_clone(parent: String, url: String) -> Result<String, String> {
+    let url = url.trim();
+    if !valid_github_repo_url(url) {
+        return Err("URL GitHub inválido".into());
+    }
+    let repo = url
+        .rsplit('/')
+        .next()
+        .unwrap_or_default()
+        .strip_suffix(".git")
+        .unwrap_or_else(|| url.rsplit('/').next().unwrap_or_default());
+    if repo.is_empty()
+        || !repo
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || "-_.".contains(c))
+    {
+        return Err("Nome do repositório inválido".into());
+    }
+    let parent = Path::new(&parent)
+        .canonicalize()
+        .map_err(|e| e.to_string())?;
+    let destination = parent.join(repo);
+    if destination.exists() {
+        return Err(format!(
+            "A pasta {} já existe; escolha outra pasta pai",
+            destination.display()
+        ));
+    }
+    let parent = parent.to_str().ok_or("Caminho de destino inválido")?;
+    let destination = destination.to_string_lossy().to_string();
+    git(parent, &["clone", "--", url, &destination])?;
+    Ok(destination)
+}
+
+#[tauri::command]
+fn git_remote(root: String) -> Result<String, String> {
+    match git(&root, &["remote", "get-url", "origin"]) {
+        Ok(url) => Ok(url.trim().to_string()),
+        Err(err) if err.contains("No such remote") => Ok(String::new()),
+        Err(err) => Err(err),
+    }
+}
+
+#[tauri::command]
+fn git_set_remote(root: String, url: String) -> Result<String, String> {
+    let url = url.trim();
+    if !valid_github_repo_url(url) {
+        return Err(
+            "Use um URL GitHub no formato https://github.com/usuario/repositorio.git".into(),
+        );
+    }
+
+    match git(&root, &["remote", "get-url", "origin"]) {
+        Ok(_) => git(&root, &["remote", "set-url", "origin", url])?,
+        Err(_) => git(&root, &["remote", "add", "origin", url])?,
+    };
+    Ok(url.to_string())
+}
+
 #[tauri::command]
 fn git_log(root: String) -> Result<String, String> {
-    git(&root, &["log", "--pretty=format:%h|%ad|%s", "--date=short", "-n", "15"])
+    git(
+        &root,
+        &[
+            "log",
+            "--pretty=format:%h|%ad|%s",
+            "--date=short",
+            "-n",
+            "15",
+        ],
+    )
 }
 
 #[tauri::command]
@@ -111,7 +214,11 @@ fn git_commit(root: String, msg: String) -> Result<String, String> {
     let gi = Path::new(&root).join(".gitignore");
     let atual = fs::read_to_string(&gi).unwrap_or_default();
     if !atual.contains("*.bak") {
-        let sep = if atual.is_empty() || atual.ends_with('\n') { "" } else { "\n" };
+        let sep = if atual.is_empty() || atual.ends_with('\n') {
+            ""
+        } else {
+            "\n"
+        };
         let _ = fs::write(&gi, format!("{}{}*.bak\n", atual, sep));
     }
     git(&root, &["add", "-A", "--", "."])?;
@@ -120,7 +227,76 @@ fn git_commit(root: String, msg: String) -> Result<String, String> {
 
 #[tauri::command]
 fn git_push(root: String) -> Result<String, String> {
-    git(&root, &["push"])
+    git(&root, &["push", "--set-upstream", "origin", "HEAD"])
+}
+
+#[tauri::command]
+fn git_pull(root: String) -> Result<String, String> {
+    git(&root, &["fetch", "origin"])?;
+    let branch = git(&root, &["rev-parse", "--abbrev-ref", "HEAD"])?;
+    let branch = branch.trim();
+    if branch == "HEAD" || branch.is_empty() {
+        return Err("Faça um commit local antes de sincronizar este repositório".into());
+    }
+    git(
+        &root,
+        &["pull", "--rebase", "--autostash", "origin", branch],
+    )
+}
+
+#[tauri::command]
+fn git_sync(root: String) -> Result<String, String> {
+    let pulled = git_pull(root.clone())?;
+    let pushed = git_push(root)?;
+    Ok(format!("{}\n{}", pulled, pushed))
+}
+
+#[derive(Serialize)]
+struct GithubStarStatus {
+    username: String,
+    starred: bool,
+}
+
+#[tauri::command]
+fn github_star_status() -> Result<GithubStarStatus, String> {
+    let user = Command::new("gh")
+        .args(["api", "user", "--jq", ".login"])
+        .output()
+        .map_err(|_| "Instale GitHub CLI (gh) e faça login com `gh auth login`".to_string())?;
+    if !user.status.success() {
+        return Err("Faça login no GitHub pelo sistema com `gh auth login`".into());
+    }
+    let username = String::from_utf8_lossy(&user.stdout).trim().to_string();
+    let star = Command::new("gh")
+        .args(["api", "user/starred/IcaropLira/HirakuComicManager"])
+        .output()
+        .map_err(|e| e.to_string())?;
+    if star.status.success() {
+        return Ok(GithubStarStatus {
+            username,
+            starred: true,
+        });
+    }
+    let error = String::from_utf8_lossy(&star.stderr);
+    if error.contains("404") || error.contains("Not Found") {
+        return Ok(GithubStarStatus {
+            username,
+            starred: false,
+        });
+    }
+    Err(error.trim().to_string())
+}
+
+#[tauri::command]
+fn open_github_repository() -> Result<(), String> {
+    let url = "https://github.com/IcaropLira/HirakuComicManager";
+    #[cfg(target_os = "linux")]
+    let result = Command::new("xdg-open").arg(url).spawn();
+    #[cfg(target_os = "macos")]
+    let result = Command::new("open").arg(url).spawn();
+    #[cfg(target_os = "windows")]
+    let result = Command::new("cmd").args(["/C", "start", "", url]).spawn();
+    result.map(|_| ()).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -163,7 +339,10 @@ fn read_asset(root: String, link: String) -> Result<String, String> {
     achar(Path::new(&root), &alvo, &mut m);
     let p = m.ok_or("arquivo não encontrado")?;
     let bytes = fs::read(&p).map_err(|e| e.to_string())?;
-    let ext = p.extension().map(|e| e.to_string_lossy().to_lowercase()).unwrap_or_default();
+    let ext = p
+        .extension()
+        .map(|e| e.to_string_lossy().to_lowercase())
+        .unwrap_or_default();
     let mime = match ext.as_str() {
         "png" => "image/png",
         "jpg" | "jpeg" => "image/jpeg",
@@ -181,7 +360,24 @@ fn main() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![list_md, write_md, delete_md, git_status, git_log, git_init, git_commit, git_push, save_asset, read_asset])
+        .invoke_handler(tauri::generate_handler![
+            list_md,
+            write_md,
+            delete_md,
+            git_status,
+            git_clone,
+            git_remote,
+            git_set_remote,
+            git_clone,
+            git_log,
+            git_init,
+            git_commit,
+            git_push,
+            git_pull,
+            git_sync,
+            save_asset,
+            read_asset
+        ])
         .run(tauri::generate_context!())
         .expect("erro ao iniciar o Terricola");
 }

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Terricola · Hiraku Comics Manager</title>
+<title>Hiraku Comics Manager</title>
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 --bg:#f3f1ee;--pn:#fff;--ink:#1c1b22;--mut:#716f7b;--ln:#dedbe4;--acc:#7a6db0;--edge:#8d8a9c;color-scheme:light}
@@ -164,7 +164,7 @@ option{background-color:var(--pn);color:var(--ink);color-scheme:inherit}
 aside{border:0;border-bottom:1px solid var(--ln)}nav{margin-left:0}}
 </style></head><body>
 <div class="app">
-<header><h1 id="app-title">Terricola · Hiraku Comics Manager</h1><span class="badge">dados de exemplo</span><button id="th" class="tg">Claro/escuro</button><button id="sbt" class="tg" hidden>☰ Filtros</button><button id="dbt" class="tg" hidden>☷ Detalhes</button>
+<header><h1 id="app-title">Hiraku Comics Manager</h1><span class="badge">dados de exemplo</span><button id="th" class="tg">Claro/escuro</button><button id="sbt" class="tg" hidden>☰ Filtros</button><button id="dbt" class="tg" hidden>☷ Detalhes</button>
 <nav><button data-v="home">⌂ Home</button><span class="ng">Visualizar</span><button data-v="graph">Grafo</button><button data-v="matrix">Matriz</button><button data-v="chaps">Cartões</button><button data-v="timeline">Timeline</button><button data-v="ficha">Ficha</button><span class="ng">Escrever</span><button data-v="fichas">✎ Fichas</button><button data-v="tramas">✎ Tramas</button><button data-v="capitulos">✎ Capítulos</button><button data-v="roteiros">✎ Roteiros</button><button data-v="pages">▤ Páginas</button><span class="ng">Projeto</span><button data-v="vault">Vault</button><button data-v="git">⎇ Git</button></nav></header>
 <aside>
 <label>Série<select id="fs"></select></label>
@@ -486,8 +486,8 @@ function grav(q){const v=f.view==="vault",s=v?vsim:sim;if(!s)return;const k=v?0.
 $("#gv").addEventListener("input",e=>{f.gv=+e.target.value;grav()});
 const RELC={aliado:"#6f9a88",rival:"#b0707a","família":"#b99a62",mentor:"#6f93ae",antagonista:"#a0505a",amor:"#a98a9f"},CPATH={};
 let RF=[],ROOTABS="",ED=null,PROJECT_NAMES={},PROJECT_EDITING=false;try{PROJECT_NAMES=JSON.parse(localStorage.getItem("terricola.projectNames")||"{}")||{}}catch(e){}
-function projectName(){return PROJECT_NAMES[ROOTABS||"local"]||(ROOTABS.split(/[\\/]/).filter(Boolean).pop())||"Terricola"}
-function updateProjectIdentity(){const title=`${projectName()} · Hiraku Comics Manager`;document.title=title;const el=$("#app-title");if(el)el.textContent=title}
+function projectName(){return PROJECT_NAMES[ROOTABS||"local"]||(ROOTABS.split(/[\\/]/).filter(Boolean).pop())||"Novo projeto"}
+function updateProjectIdentity(){const title=`${projectName()} · Hiraku Comics Manager`;document.title=title;const el=$("#app-title");if(el)el.textContent=title;try{const win=window.__TAURI__&&window.__TAURI__.window.getCurrentWindow();if(win)win.setTitle(title).catch(()=>{})}catch(e){}}
 function saveProjectName(){const input=$("#project-name-input"),name=input&&input.value.trim();if(!name)return;PROJECT_NAMES[ROOTABS||"local"]=name;try{localStorage.setItem("terricola.projectNames",JSON.stringify(PROJECT_NAMES))}catch(e){}PROJECT_EDITING=false;updateProjectIdentity();home()}
 function pvers(fm){const b=(fm.match(/^versoes:[ \t]*\r?\n((?:[ \t]+.*\r?\n?)*)/m)||[])[1]||"";
  return b.split(/^[ \t]*- (?=nome:)/m).slice(1).map(x=>{const g=k=>((x.match(new RegExp("^[ \\t]*(?:- )?"+k+":[ \\t]*(.*)$","m"))||[])[1]||"").trim();let c=[];try{c=JSON.parse(g("caps")||"[]")}catch(e){}return{nome:g("nome"),idade:g("idade"),status:g("status")||"vivo",caps:c}})}
@@ -564,6 +564,7 @@ $("#view").addEventListener("click",e=>{const t=e.target.closest("[data-ea],[dat
 async function nopen(r0){const T=window.__TAURI__,r=r0||await T.dialog.open({directory:true});if(!r)return;ROOTABS=r;try{localStorage.setItem("terricola.root",r)}catch(x){}
  const L=await T.core.invoke("list_md",{root:r});RF=L.map(x=>({name:x.path.split("/").pop(),webkitRelativePath:x.path,_t:x.text,text(){return Promise.resolve(this._t)}}));
  VT=await vload(RF);vapply();VS.sel=null;VS.tab="graph";f.view="home";render()}
+async function cloneRepository(url){if(!window.__TAURI__){alert("A clonagem está disponível no app desktop.");return}if(!url||!url.trim()){alert("Informe o URL do repositório GitHub.");return}const parent=await window.__TAURI__.dialog.open({directory:true,title:"Escolha a pasta onde criar o projeto"});if(!parent)return;try{const root=await window.__TAURI__.core.invoke("git_clone",{parent,url:url.trim()});await nopen(root)}catch(e){alert("Não consegui clonar o repositório. Confira o Git instalado e, se ele for privado, entre com gh auth login.\n\n"+e)}}
 if(window.__TAURI__){let r=null;try{r=localStorage.getItem("terricola.root")}catch(x){}if(r){f.view="home";nopen(r).catch(()=>{})}}
 let LT="personagem";
 const LN={personagem:["fichas","Nova ficha"],trama:["tramas","Nova trama"],capitulo:["capítulos","Novo capítulo"]};
@@ -701,16 +702,16 @@ $("#view").addEventListener("click",e=>{const t=e.target.closest("[data-ho],[dat
  else if(a==="pag"){B.splice(i+1,0,{t:"pag",txt:""},{t:"pan",txt:""});D.fi=i+1}
  else if(a==="del"){if(B.length>1){B.splice(i,1);D.fi=Math.max(0,i-1)}}
  D.dirty=1;if(D.fi!=null)D.cur=D.fi;render()});
-const GS={auto:false,out:""};try{GS.auto=localStorage.getItem("terricola.gitauto")==="1"}catch(e){}
+const GS={auto:false,out:"",starred:null};try{GS.auto=localStorage.getItem("terricola.gitauto")==="1"}catch(e){}
 async function gitc(cmd,a){return __TAURI__.core.invoke(cmd,{root:ROOTABS,...(a||{})})}
-async function gitAuto(p){if(window.__TAURI__&&ROOTABS&&GS.auto){try{await gitc("git_commit",{msg:"Atualiza "+p.split("/").pop().replace(/\.md$/i,"")})}catch(e){}}}
+async function gitAuto(p){if(window.__TAURI__&&ROOTABS&&GS.auto){try{const remote=await gitc("git_remote");if(remote)await gitc("git_pull");await gitc("git_commit",{msg:"Atualiza "+p.split("/").pop().replace(/\.md$/i,"")});if(remote)await gitc("git_push")}catch(e){GS.out="Arquivo salvo, mas a sincronização Git falhou: "+e}}}
 function rec(k,p,n){try{const r=JSON.parse(localStorage.getItem("terricola.recent")||"[]").filter(x=>x.p!==p);r.unshift({k,p,n});localStorage.setItem("terricola.recent",JSON.stringify(r.slice(0,8)))}catch(e){}}
 function home(){
  updateProjectIdentity();
  const n={p:C.length,c:CH.length,t:Object.keys(T).length,r:VT?VT.notes.filter(x=>x.tipo==="roteiro").length:0,notas:VT?VT.notes.length:0,e:VT?VT.E.size:0};
  const card=(v,ic,t,d,c)=>`<div class="card chip hc" data-nav="${v}"><div class="hi2">${ic}</div><b>${t}</b><div class="mut">${d}</div><div class="hn">${c==null?"":c}</div></div>`;
  let rc=[];try{rc=JSON.parse(localStorage.getItem("terricola.recent")||"[]")}catch(e){}
- $("#view").innerHTML=`<div class="hp"><div class="hh">${PROJECT_EDITING?`<div class="project-heading"><input id="project-name-input" value="${esc(projectName())}" aria-label="Nome do projeto"><button class="tg on" data-project-save title="Salvar nome" aria-label="Salvar nome">✓</button><button class="tg" data-project-cancel title="Cancelar" aria-label="Cancelar">×</button></div>`:`<div class="project-heading"><h2>${esc(projectName())}</h2><button class="tg" data-project-rename title="Renomear projeto" aria-label="Renomear projeto">✎</button></div>`}<div class="mut">Hiraku Comics Manager · ${VT?`${n.notas} notas · ${n.e} conexões`:"nenhum Vault carregado"}</div>${VT?"":`<div style="margin-top:14px">${window.__TAURI__?'<button class="tg on" id="vn">Escolher pasta do Vault…</button>':'<button class="tg on" data-nav="vault">Carregar o Vault</button>'}</div>`}</div>
+ $("#view").innerHTML=`<div class="hp"><div class="hh">${PROJECT_EDITING?`<div class="project-heading"><input id="project-name-input" value="${esc(projectName())}" aria-label="Nome do projeto"><button class="tg on" data-project-save title="Salvar nome" aria-label="Salvar nome">✓</button><button class="tg" data-project-cancel title="Cancelar" aria-label="Cancelar">×</button></div>`:`<div class="project-heading"><h2>${esc(projectName())}</h2><button class="tg" data-project-rename title="Renomear projeto" aria-label="Renomear projeto">✎</button></div>`}<div class="mut">Hiraku Comics Manager · ${VT?`${n.notas} notas · ${n.e} conexões`:"nenhum Vault carregado"}</div>${VT?"":`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:14px">${window.__TAURI__?'<button class="tg on" id="vn">Abrir projeto…</button><input id="clone-repo-url" type="url" placeholder="URL GitHub do seu projeto" style="min-width:240px;max-width:360px"><button class="tg" data-clone-repo>Clonar projeto</button>':'<button class="tg on" data-nav="vault">Carregar projeto</button>'}</div>`}</div>
  <h5>Visualizar</h5><div class="cards">${card("graph","◉","Grafo","Notas, personagens e conexões do vault",n.e+" conexões")}${card("matrix","▦","Matriz","Quem aparece em cada capítulo e trama")}${card("timeline","⟷","Timeline","Capítulos por publicação ou cronologia",n.c+" capítulos")}${card("ficha","☺","Fichas (visão rápida)","Rede e versões de cada personagem",n.p+" personagens")}</div>
  <h5>Escrever</h5><div class="cards">${card("fichas","✎","Fichas","Editor de fichas de personagem",n.p)}${card("tramas","✎","Tramas","Tramas e seus vínculos",n.t)}${card("capitulos","✎","Capítulos","Resumo, elenco e status",n.c)}${card("roteiros","✎","Roteiros","Hiraku Comics Editor",n.r+" roteiros")}</div>
  <h5>Projeto</h5><div class="cards">${card("vault","▣","Vault","Pasta, classificação e revisão",n.notas+" notas")}${card("git","⎇","Git","Versões e commits",'<span id="hg"></span>')}</div>
@@ -721,24 +722,30 @@ async function gitv(){
  if(!window.__TAURI__){el.innerHTML='<div class="empty"><h3>Git</h3><p class="mut">A integração com Git funciona no app desktop.</p></div>';return}
  if(!ROOTABS){el.innerHTML='<div class="empty"><h3>Git</h3><p class="mut">Carregue a pasta do vault primeiro, na Home.</p></div>';return}
  el.innerHTML='<p class="empty">Lendo o repositório…</p>';
- let st="",lg="",err="";
+ let st="",lg="",remote="",err="";
  try{st=await gitc("git_status")}catch(e){err=String(e)}
- if(!err){try{lg=await gitc("git_log")}catch(e){lg=""}}
+ if(!err){try{lg=await gitc("git_log")}catch(e){lg=""}try{remote=await gitc("git_remote")}catch(e){remote=""}}
  if(f.view!=="git")return;
  const out=GS.out?`<div class="pc es" style="margin:10px 0"><div class="mut" style="white-space:pre-wrap">${esc(GS.out)}</div></div>`:"";
  if(err){el.innerHTML=`<div class="hp"><h5>Git</h5><div class="pc es">${/not a git repository/i.test(err)?'<h4>Esta pasta ainda não é um repositório Git</h4><button class="tg on" data-git="init">Iniciar repositório</button>':`<h4>Não consegui ler o Git</h4><div class="mut">${esc(err)}</div>`}${out}</div></div>`;return}
  const L=st.split("\n").filter(Boolean),br=(L[0]||"").replace(/^## /,""),ch=L.slice(1),lab=c=>c.startsWith("??")||c.includes("A")?"novo":c.includes("D")?"removido":"modificado";
- el.innerHTML=`<div class="hp"><h5>Repositório · ${esc(br)}</h5><div class="pc es" style="margin-top:10px"><h4>${ch.length?ch.length+" alterações":"Tudo em dia"}</h4>${ch.slice(0,40).map(l=>`<div class="rv"><span class="p">${esc(l.slice(3))}</span><span class="mut">${lab(l.slice(0,2))}</span></div>`).join("")}<div style="margin-top:10px"><input id="gm" placeholder="Mensagem do commit" value="Atualiza fichas e roteiros" style="width:55%"> <button class="tg on" data-git="commit">Commit</button><button class="tg" data-git="push">Commit e push</button><button class="tg" data-git="refresh">Atualizar</button></div><label class="ck" style="margin-top:10px"><input id="gau" type="checkbox" ${GS.auto?"checked":""}>Commit automático ao salvar uma nota</label></div>${out}<h5>Histórico recente</h5><div class="pc es" style="margin-top:10px">${lg.split("\n").filter(Boolean).map(x=>{const[h,d,...m]=x.split("|");return`<div class="rv"><span class="p">${esc(m.join("|"))}</span><span class="mut">${esc(d)} · ${esc(h)}</span></div>`}).join("")||'<span class="mut">Sem commits ainda.</span>'}</div></div>`}
+ el.innerHTML=`<div class="hp"><h5>GitHub · ${esc(br)}</h5><div class="pc es" style="margin-top:10px"><h4>Repositório remoto</h4><div class="mut">${remote?`Origin: ${esc(remote)}`:"Conecte um repositório GitHub para sincronizar este Vault."}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0"><input id="git-url" type="url" placeholder="https://github.com/usuario/repositorio.git" value="${esc(remote)}" style="flex:1;min-width:240px"><button class="tg on" data-git="remote">Conectar repositório</button>${remote?'<button class="tg" data-git="pull">Puxar e mesclar</button><button class="tg" data-git="sync">Sincronizar pull + push</button>':""}</div><div class="mut">Login seguro pelo Git do sistema: instale GitHub CLI e execute <code>gh auth login</code>. O app não guarda tokens.</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px"><button class="tg" data-git="star">Verificar estrela</button>${GS.starred===false?'<button class="tg on" data-git="openrepo">Dar estrela no GitHub</button>':""}<span id="star-state" class="mut">${GS.starred===true?"Obrigado por apoiar o projeto!":GS.starred===false?"Ainda sem estrela para este repositório.":""}</span></div></div><div class="pc es" style="margin-top:10px"><h4>${ch.length?ch.length+" alterações":"Tudo em dia"}</h4>${ch.slice(0,40).map(l=>`<div class="rv"><span class="p">${esc(l.slice(3))}</span><span class="mut">${lab(l.slice(0,2))}</span></div>`).join("")}<div style="margin-top:10px"><input id="gm" placeholder="Mensagem do commit" value="Atualiza fichas e roteiros" style="width:55%"> <button class="tg on" data-git="commit">Commit</button><button class="tg" data-git="push">Commit e push</button><button class="tg" data-git="refresh">Atualizar</button></div><label class="ck" style="margin-top:10px"><input id="gau" type="checkbox" ${GS.auto?"checked":""}>Commit, pull e push automáticos ao salvar</label></div>${out}<h5>Histórico recente</h5><div class="pc es" style="margin-top:10px">${lg.split("\n").filter(Boolean).map(x=>{const[h,d,...m]=x.split("|");return`<div class="rv"><span class="p">${esc(m.join("|"))}</span><span class="mut">${esc(d)} · ${esc(h)}</span></div>`}).join("")||'<span class="mut">Sem commits ainda.</span>'}</div></div>`;
+ if(GS.starred===null)gitc("github_star_status").then(s=>{GS.starred=s.starred;const el=$("#star-state");if(el)el.textContent=s.starred?`@${s.username}, obrigado por apoiar!`:`@${s.username}, você ainda não deu estrela.`;if(!s.starred){const b=document.createElement("button");b.className="tg on";b.dataset.git="openrepo";b.textContent="Dar estrela no GitHub";el.before(b)}}).catch(e=>{const el=$("#star-state");if(el)el.textContent=String(e)})}
 $("#view").addEventListener("click",async e=>{const t=e.target.closest("[data-git],[data-nav]");if(!t)return;
  if(t.dataset.nav){f.view=t.dataset.nav;if(f.view==="ficha")f.fo=0;return render()}
  const a=t.dataset.git;GS.out="";
  try{if(a==="init")GS.out=await gitc("git_init");
+  else if(a==="remote"){GS.out=await gitc("git_set_remote",{url:($("#git-url").value||"").trim()});GS.starred=null}
+  else if(a==="pull")GS.out=await gitc("git_pull");
+  else if(a==="sync")GS.out=await gitc("git_sync");
+  else if(a==="star"){const s=await gitc("github_star_status");GS.starred=s.starred;GS.out=s.starred?`@${s.username}, obrigado por apoiar!`:`@${s.username}, você ainda não deu estrela.`}
+  else if(a==="openrepo")GS.out=await gitc("open_github_repository");
   else if(a==="commit"||a==="push"){GS.out=await gitc("git_commit",{msg:($("#gm").value||"Atualiza o vault").trim()});if(a==="push")GS.out+="\n"+await gitc("git_push")}}
  catch(x){GS.out=String(x)}
  gitv()});
 $("#view").addEventListener("change",e=>{if(e.target.id==="gau"){GS.auto=e.target.checked;try{localStorage.setItem("terricola.gitauto",GS.auto?"1":"0")}catch(x){}}});
 document.querySelector("h1").onclick=()=>{PROJECT_EDITING=false;f.view="home";render()};
-$("#view").addEventListener("click",e=>{if(e.target.closest("[data-project-rename]")){PROJECT_EDITING=true;home();$("#project-name-input").focus();$("#project-name-input").select()}else if(e.target.closest("[data-project-save]"))saveProjectName();else if(e.target.closest("[data-project-cancel]")){PROJECT_EDITING=false;home()}});
+$("#view").addEventListener("click",e=>{if(e.target.closest("[data-clone-repo]"))return cloneRepository($("#clone-repo-url").value);if(e.target.closest("[data-project-rename]")){PROJECT_EDITING=true;home();$("#project-name-input").focus();$("#project-name-input").select()}else if(e.target.closest("[data-project-save]"))saveProjectName();else if(e.target.closest("[data-project-cancel]")){PROJECT_EDITING=false;home()}});
 $("#view").addEventListener("keydown",e=>{if(e.target.id==="project-name-input"&&e.key==="Enter"){e.preventDefault();saveProjectName()}else if(e.target.id==="project-name-input"&&e.key==="Escape"){PROJECT_EDITING=false;home()}});
 const SBO={},DBO={},FV=["graph","matrix","chaps","timeline"],RV=["graph","ficha","vault"],sbOpen=v=>SBO[v]===undefined?v==="graph":SBO[v],detOpen=v=>DBO[v]===undefined?v==="graph":DBO[v];
 function layout(){const A=document.querySelector(".app"),hf=FV.includes(f.view),o=hf&&sbOpen(f.view),r=RV.includes(f.view)&&detOpen(f.view);A.classList.toggle("nl",!o);A.classList.toggle("nr",!r);$("#sbt").hidden=!hf;$("#sbt").classList.toggle("on",o);$("#dbt").hidden=!RV.includes(f.view);$("#dbt").classList.toggle("on",r)}

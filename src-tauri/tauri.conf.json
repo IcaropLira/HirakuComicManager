@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Terricola",
+  "productName": "Hiraku Comics Manager",
   "version": "0.1.0",
   "identifier": "com.hiraku.terricola",
   "build": {
@@ -11,7 +11,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Terricola · Hiraku Comics Manager",
+        "title": "Hiraku Comics Manager",
         "width": 1400,
         "height": 900,
         "dragDropEnabled": false
