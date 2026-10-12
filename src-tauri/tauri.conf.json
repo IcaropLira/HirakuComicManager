@@ -35,7 +35,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEE1OUNFQTkxRUNERDc0OTQKUldTVWROM3NrZXFjcFN1cUcvaERBZ0dDYldDYVNXWGdZV3JIMjlLS3hLWnR2VktFYUhMM2FleXcK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDUzNUZFOTJBMTc4QjZBQTgKUldTb2Fvc1hLdWxmVTRhZCsrV1hzT09ueWRkc1h1amlYWjAzWFFzZzR2SGVKWCtENlZtcGFDT2cK",
       "endpoints": [
         "https://github.com/IcaropLira/HirakuComicManager/releases/latest/download/latest.json"
       ]
