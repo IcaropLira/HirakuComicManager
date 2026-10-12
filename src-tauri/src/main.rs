@@ -4,7 +4,9 @@ use serde::Serialize;
 use std::{
     fs,
     path::{Component, Path, PathBuf},
-    process::Command,
+    io::Write,
+    process::{Command, Stdio},
+    time::Duration,
 };
 
 #[derive(Serialize)]
@@ -113,7 +115,7 @@ fn git(root: &str, args: &[&str]) -> Result<String, String> {
     }
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn git_status(root: String) -> Result<String, String> {
     git(&root, &["status", "--porcelain", "-b"])
 }
@@ -133,7 +135,7 @@ fn valid_github_repo_url(url: &str) -> bool {
         && !url.chars().any(char::is_whitespace)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn git_clone(parent: String, url: String) -> Result<String, String> {
     let url = url.trim();
     if !valid_github_repo_url(url) {
@@ -168,7 +170,7 @@ fn git_clone(parent: String, url: String) -> Result<String, String> {
     Ok(destination)
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn git_remote(root: String) -> Result<String, String> {
     match git(&root, &["remote", "get-url", "origin"]) {
         Ok(url) => Ok(url.trim().to_string()),
@@ -177,7 +179,7 @@ fn git_remote(root: String) -> Result<String, String> {
     }
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn git_set_remote(root: String, url: String) -> Result<String, String> {
     let url = url.trim();
     if !valid_github_repo_url(url) {
@@ -193,7 +195,7 @@ fn git_set_remote(root: String, url: String) -> Result<String, String> {
     Ok(url.to_string())
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn git_log(root: String) -> Result<String, String> {
     git(
         &root,
@@ -207,12 +209,12 @@ fn git_log(root: String) -> Result<String, String> {
     )
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn git_init(root: String) -> Result<String, String> {
     git(&root, &["init"])
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn git_commit(root: String, msg: String) -> Result<String, String> {
     // os .bak de segurança não entram no repositório
     let gi = Path::new(&root).join(".gitignore");
@@ -233,12 +235,12 @@ fn git_commit(root: String, msg: String) -> Result<String, String> {
     git(&root, &["commit", "-m", &msg])
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn git_push(root: String) -> Result<String, String> {
     git(&root, &["push", "--set-upstream", "origin", "HEAD"])
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn git_pull(root: String) -> Result<String, String> {
     git(&root, &["fetch", "origin"])?;
     let branch = git(&root, &["rev-parse", "--abbrev-ref", "HEAD"])?;
@@ -289,7 +291,7 @@ struct RemoteState {
 }
 
 /// Busca o remoto e diz quantos commits o Vault local está atrás/à frente.
-#[tauri::command]
+#[tauri::command(async)]
 fn git_check_remote(root: String) -> Result<RemoteState, String> {
     let vazio = RemoteState {
         remote: false,
@@ -327,11 +329,223 @@ fn git_check_remote(root: String) -> Result<RemoteState, String> {
     })
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn git_sync(root: String) -> Result<String, String> {
     let pulled = git_pull(root.clone())?;
     let pushed = git_push(root)?;
     Ok(format!("{}\n{}", pulled, pushed))
+}
+
+// ---------- Login no GitHub (Device Flow) ----------
+// 1) Crie um OAuth App em github.com/settings/developers e marque "Enable Device Flow".
+// 2) Cole o Client ID abaixo (ele é público, não é segredo) ou defina HIRAKU_GITHUB_CLIENT_ID no build.
+const GITHUB_CLIENT_ID: &str = match option_env!("HIRAKU_GITHUB_CLIENT_ID") {
+    Some(id) => id,
+    None => "COLE_AQUI_O_CLIENT_ID_DO_OAUTH_APP",
+};
+const GITHUB_WEB: &str = "https://github.com";
+const GITHUB_API: &str = "https://api.github.com";
+const GITHUB_SCOPE: &str = "repo";
+
+#[derive(Serialize)]
+struct DeviceCode {
+    device_code: String,
+    user_code: String,
+    verification_uri: String,
+    interval: u64,
+    expires_in: u64,
+}
+
+#[derive(Serialize)]
+struct LoginPoll {
+    /// "pending" | "slow_down" | "ok" | "expired" | "denied"
+    status: String,
+    login: Option<String>,
+    interval: Option<u64>,
+}
+
+fn http_agent() -> ureq::Agent {
+    ureq::AgentBuilder::new()
+        .timeout(Duration::from_secs(20))
+        .user_agent("HirakuComicManager")
+        .build()
+}
+
+fn device_start(web: &str, client_id: &str) -> Result<DeviceCode, String> {
+    if client_id.starts_with("COLE_AQUI") || client_id.trim().is_empty() {
+        return Err("CLIENT_ID_AUSENTE".into());
+    }
+    let v: serde_json::Value = http_agent()
+        .post(&format!("{}/login/device/code", web))
+        .set("Accept", "application/json")
+        .send_form(&[("client_id", client_id), ("scope", GITHUB_SCOPE)])
+        .map_err(|e| format!("Não consegui falar com o GitHub: {}", e))?
+        .into_json()
+        .map_err(|e| e.to_string())?;
+    if let Some(err) = v["error"].as_str() {
+        return Err(format!(
+            "O GitHub recusou o login ({}). Confira se o OAuth App tem \"Enable Device Flow\" marcado.",
+            err
+        ));
+    }
+    Ok(DeviceCode {
+        device_code: v["device_code"].as_str().unwrap_or_default().into(),
+        user_code: v["user_code"].as_str().unwrap_or_default().into(),
+        verification_uri: v["verification_uri"]
+            .as_str()
+            .unwrap_or("https://github.com/login/device")
+            .into(),
+        interval: v["interval"].as_u64().unwrap_or(5),
+        expires_in: v["expires_in"].as_u64().unwrap_or(900),
+    })
+}
+
+/// Ok(Some(token)) quando autorizado; Ok(None) + status quando ainda não.
+fn device_poll(web: &str, client_id: &str, device_code: &str) -> Result<Result<String, LoginPoll>, String> {
+    let v: serde_json::Value = http_agent()
+        .post(&format!("{}/login/oauth/access_token", web))
+        .set("Accept", "application/json")
+        .send_form(&[
+            ("client_id", client_id),
+            ("device_code", device_code),
+            ("grant_type", "urn:ietf:params:oauth:grant-type:device_code"),
+        ])
+        .map_err(|e| format!("Não consegui falar com o GitHub: {}", e))?
+        .into_json()
+        .map_err(|e| e.to_string())?;
+    if let Some(tok) = v["access_token"].as_str() {
+        return Ok(Ok(tok.to_string()));
+    }
+    let status = match v["error"].as_str().unwrap_or("") {
+        "authorization_pending" => "pending",
+        "slow_down" => "slow_down",
+        "expired_token" => "expired",
+        "access_denied" => "denied",
+        other => return Err(format!("Resposta inesperada do GitHub: {}", other)),
+    };
+    Ok(Err(LoginPoll {
+        status: status.into(),
+        login: None,
+        interval: v["interval"].as_u64(),
+    }))
+}
+
+fn github_user(api: &str, token: &str) -> Result<Option<String>, String> {
+    match http_agent()
+        .get(&format!("{}/user", api))
+        .set("Accept", "application/vnd.github+json")
+        .set("Authorization", &format!("Bearer {}", token))
+        .call()
+    {
+        Ok(r) => {
+            let v: serde_json::Value = r.into_json().map_err(|e| e.to_string())?;
+            Ok(v["login"].as_str().map(|s| s.to_string()))
+        }
+        Err(ureq::Error::Status(401, _)) | Err(ureq::Error::Status(403, _)) => Ok(None),
+        Err(e) => Err(format!("Sem conexão com o GitHub: {}", e)),
+    }
+}
+
+/// Fala com o credential helper do Git (o mesmo que `git push` usa).
+fn git_credential(op: &str, input: &str) -> Result<String, String> {
+    let mut child = Command::new("git")
+        .args(["credential", op])
+        .env("GIT_TERMINAL_PROMPT", "0")
+        .env("GCM_INTERACTIVE", "never")
+        .env("LC_ALL", "C")
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .map_err(|e| format!("Não consegui executar o git: {}", e))?;
+    child
+        .stdin
+        .take()
+        .ok_or("sem stdin")?
+        .write_all(input.as_bytes())
+        .map_err(|e| e.to_string())?;
+    let o = child.wait_with_output().map_err(|e| e.to_string())?;
+    if o.status.success() {
+        Ok(String::from_utf8_lossy(&o.stdout).to_string())
+    } else {
+        Err(String::from_utf8_lossy(&o.stderr).to_string())
+    }
+}
+
+fn stored_token() -> Option<String> {
+    let out = git_credential("fill", "protocol=https\nhost=github.com\n\n").ok()?;
+    out.lines()
+        .find_map(|l| l.strip_prefix("password=").map(|s| s.to_string()))
+        .filter(|t| !t.is_empty())
+}
+
+/// Garante que exista algum credential helper para o Git lembrar do login.
+fn ensure_credential_helper() {
+    let tem = Command::new("git")
+        .args(["config", "--get-all", "credential.helper"])
+        .output()
+        .map(|o| !String::from_utf8_lossy(&o.stdout).trim().is_empty())
+        .unwrap_or(false);
+    if tem {
+        return;
+    }
+    let helper = if cfg!(target_os = "windows") {
+        "manager"
+    } else if cfg!(target_os = "macos") {
+        "osxkeychain"
+    } else if ["/usr/libexec/git-core/git-credential-libsecret", "/usr/lib/git-core/git-credential-libsecret"]
+        .iter()
+        .any(|p| Path::new(p).exists())
+    {
+        "libsecret"
+    } else {
+        "store"
+    };
+    let _ = Command::new("git")
+        .args(["config", "--global", "credential.helper", helper])
+        .output();
+}
+
+#[tauri::command(async)]
+fn github_login_start() -> Result<DeviceCode, String> {
+    device_start(GITHUB_WEB, GITHUB_CLIENT_ID)
+}
+
+#[tauri::command(async)]
+fn github_login_poll(device_code: String) -> Result<LoginPoll, String> {
+    match device_poll(GITHUB_WEB, GITHUB_CLIENT_ID, &device_code)? {
+        Err(pending) => Ok(pending),
+        Ok(token) => {
+            let login = github_user(GITHUB_API, &token)?.ok_or("O GitHub não aceitou o token recebido")?;
+            ensure_credential_helper();
+            git_credential(
+                "approve",
+                &format!(
+                    "protocol=https\nhost=github.com\nusername={}\npassword={}\n\n",
+                    login, token
+                ),
+            )?;
+            Ok(LoginPoll {
+                status: "ok".into(),
+                login: Some(login),
+                interval: None,
+            })
+        }
+    }
+}
+
+/// Login da conta conectada (None se não houver login salvo ou se o token expirou).
+#[tauri::command(async)]
+fn github_account() -> Result<Option<String>, String> {
+    let Some(token) = stored_token() else {
+        return Ok(None);
+    };
+    github_user(GITHUB_API, &token)
+}
+
+#[tauri::command(async)]
+fn github_logout() -> Result<(), String> {
+    git_credential("reject", "protocol=https\nhost=github.com\n\n").map(|_| ())
 }
 
 #[derive(Serialize)]
@@ -340,39 +554,33 @@ struct GithubStarStatus {
     starred: bool,
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 fn github_star_status() -> Result<GithubStarStatus, String> {
-    let user = Command::new("gh")
-        .args(["api", "user", "--jq", ".login"])
-        .output()
-        .map_err(|_| "Instale GitHub CLI (gh) e faça login com `gh auth login`".to_string())?;
-    if !user.status.success() {
-        return Err("Faça login no GitHub pelo sistema com `gh auth login`".into());
+    let token = stored_token().ok_or("Entre com o GitHub na aba Git primeiro")?;
+    let username = github_user(GITHUB_API, &token)?.ok_or("Login do GitHub expirou; entre de novo")?;
+    let r = http_agent()
+        .get(&format!("{}/user/starred/IcaropLira/HirakuComicManager", GITHUB_API))
+        .set("Authorization", &format!("Bearer {}", token))
+        .call();
+    match r {
+        Ok(_) => Ok(GithubStarStatus { username, starred: true }),
+        Err(ureq::Error::Status(404, _)) => Ok(GithubStarStatus { username, starred: false }),
+        Err(e) => Err(e.to_string()),
     }
-    let username = String::from_utf8_lossy(&user.stdout).trim().to_string();
-    let star = Command::new("gh")
-        .args(["api", "user/starred/IcaropLira/HirakuComicManager"])
-        .output()
-        .map_err(|e| e.to_string())?;
-    if star.status.success() {
-        return Ok(GithubStarStatus {
-            username,
-            starred: true,
-        });
-    }
-    let error = String::from_utf8_lossy(&star.stderr);
-    if error.contains("404") || error.contains("Not Found") {
-        return Ok(GithubStarStatus {
-            username,
-            starred: false,
-        });
-    }
-    Err(error.trim().to_string())
 }
 
 #[tauri::command]
 fn open_github_repository() -> Result<(), String> {
-    let url = "https://github.com/IcaropLira/HirakuComicManager";
+    open_url("https://github.com/IcaropLira/HirakuComicManager".into())
+}
+
+/// Abre no navegador padrão. Só aceita endereços do github.com.
+#[tauri::command]
+fn open_url(url: String) -> Result<(), String> {
+    if !url.starts_with("https://github.com/") || url.chars().any(|c| c.is_whitespace() || c == '"' || c == '&' || c == '^') {
+        return Err("Endereço não permitido".into());
+    }
+    let url = url.as_str();
     #[cfg(target_os = "linux")]
     let result = Command::new("xdg-open").arg(url).spawn();
     #[cfg(target_os = "macos")]
@@ -453,7 +661,6 @@ fn main() {
             git_clone,
             git_remote,
             git_set_remote,
-            git_clone,
             git_log,
             git_init,
             git_commit,
@@ -461,6 +668,13 @@ fn main() {
             git_pull,
             git_check_remote,
             git_sync,
+            github_login_start,
+            github_login_poll,
+            github_account,
+            github_logout,
+            github_star_status,
+            open_github_repository,
+            open_url,
             save_asset,
             read_asset
         ])

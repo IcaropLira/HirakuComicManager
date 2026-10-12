@@ -14,7 +14,9 @@ body{background:var(--bg);color:var(--ink);font:14px/1.45 "Trebuchet MS","Segoe 
 header{grid-column:1/-1;display:flex;gap:16px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--ln);flex-wrap:wrap}
 .app>aside,.app>#view{grid-row:2}
 #toasts{position:fixed;right:16px;bottom:40px;display:flex;flex-direction:column;gap:8px;z-index:60;max-width:min(420px,calc(100vw - 32px))}
+.gh-code{display:inline-block;margin:10px 0;padding:10px 16px;font:700 28px/1.2 ui-monospace,Consolas,monospace;letter-spacing:.2em;background:var(--bg);border:2px dashed var(--acc);border-radius:8px;user-select:all}
 .toast{background:var(--pn);color:var(--ink);border:1px solid var(--acc);border-radius:8px;padding:10px 12px;font-size:13px;box-shadow:0 4px 18px rgba(0,0,0,.2)}.toast[hidden]{display:none}.toast button{margin-left:6px;cursor:pointer}
+.app-footer a{color:var(--acc);text-decoration:none}.app-footer a:hover{text-decoration:underline}
 .app-footer{grid-column:1/-1;grid-row:3;padding:5px 14px;border-top:1px solid var(--ln);color:var(--mut);font-size:11px;text-align:center}
 h1{font:700 17px Georgia,"Times New Roman",serif;margin:0;letter-spacing:.2px}
 .badge{font-size:12px;color:var(--mut);border:1px dashed var(--ln);padding:1px 8px;border-radius:10px}
@@ -829,12 +831,44 @@ $("#view").addEventListener("click",e=>{const t=e.target.closest("[data-ho],[dat
  else if(a==="pag"){B.splice(i+1,0,{t:"pag",txt:""},{t:"pan",txt:""});D.fi=i+1}
  else if(a==="del"){if(B.length>1){B.splice(i,1);D.fi=Math.max(0,i-1)}}
  D.dirty=1;if(D.fi!=null)D.cur=D.fi;render()});
-const GS={auto:false,out:"",starred:null};try{GS.auto=localStorage.getItem("terricola.gitauto")==="1"}catch(e){}
+const GS={auto:true,out:"",starred:null};try{GS.auto=localStorage.getItem("terricola.gitauto")!=="0"}catch(e){}
 async function gitc(cmd,a){return __TAURI__.core.invoke(cmd,{root:ROOTABS,...(a||{})})}
 async function relistRF(){const L=await __TAURI__.core.invoke("list_md",{root:ROOTABS});RF=L.map(x=>({name:x.path.split("/").pop(),webkitRelativePath:x.path,_t:x.text,text(){return Promise.resolve(this._t)}}))}
 async function vreload(){await relistRF();VT=await vload(RF);vapply();render()}
 const pullChanged=o=>!/up to date|nada para puxar/i.test(o||"");
-async function gitAuto(p){if(window.__TAURI__&&ROOTABS&&GS.auto){VWBUSY=true;try{const remote=await gitc("git_remote");if(remote){const o=await gitc("git_pull");if(pullChanged(o))await relistRF()}await gitc("git_commit",{msg:"Atualiza "+p.split("/").pop().replace(/\.md$/i,"")});if(remote)await gitc("git_push")}catch(e){GS.out="Arquivo salvo, mas a sincronização Git falhou: "+e;toast("tv","⚠ "+esc(String(e)),12000)}finally{VWBUSY=false}}}
+async function gitAuto(p){if(window.__TAURI__&&ROOTABS&&GS.auto){VWBUSY=true;try{const remote=await gitc("git_remote");if(remote){const o=await gitc("git_pull");if(pullChanged(o))await relistRF()}await gitc("git_commit",{msg:"Atualiza "+p.split("/").pop().replace(/\.md$/i,"")});if(remote)await gitc("git_push")}catch(e){GS.out="Arquivo salvo, mas a sincronização Git falhou: "+e;if(!authAsk(e))toast("tv","⚠ Arquivo salvo, mas a sincronização falhou: "+esc(String(e).slice(0,300)),12000)}finally{VWBUSY=false}}}
+/* ---- Conta GitHub: login pelo navegador (Device Flow), sem terminal ---- */
+const GH={user:undefined,code:null,msg:"",cancel:false},tinv=(c,a)=>__TAURI__.core.invoke(c,a||{});
+const AUTHRX=/could not read (username|password)|terminal prompts disabled|authentication failed|invalid username|permission to .* denied|repository not found|returned error: 40[13]/i;
+function authAsk(e){const m=String(e);if(!AUTHRX.test(m))return false;toast("tauth",'⚠ O GitHub pediu login para sincronizar. <button data-gh-go="1">Entrar com GitHub</button> <button data-gh="x" aria-label="Fechar">×</button>');return true}
+function ghCard(){
+ if(GH.code)return`<h4>Conta GitHub</h4><div>Abri o navegador em <b>${esc(GH.code.verification_uri)}</b>. Digite este código lá:</div><div class="gh-code">${esc(GH.code.user_code)}</div><div class="mut">Aguardando você autorizar no navegador…</div><div style="margin-top:8px"><button class="tg" data-gh="open">Abrir a página de novo</button> <button class="tg" data-gh="cancel">Cancelar</button></div>`;
+ if(GH.user===undefined)return`<h4>Conta GitHub</h4><div class="mut">Verificando…</div>`;
+ if(GH.user)return`<h4>Conta GitHub</h4><div>Conectado como <b>@${esc(GH.user)}</b> ✔ <button class="tg" data-gh="logout">Sair</button></div><div class="mut" style="margin-top:4px">O login fica guardado no Git do sistema (o mesmo do terminal). O app não guarda senha.</div>`;
+ return`<h4>Conta GitHub</h4><div class="mut">Entre com sua conta do GitHub para o app enviar e receber as alterações sozinho, sem terminal.</div><div style="margin-top:8px"><button class="tg on" data-gh="login">Entrar com GitHub</button></div>${GH.msg?`<div class="mut" style="white-space:pre-wrap;margin-top:8px">${esc(GH.msg)}</div>`:""}`}
+function ghPaint(){const e=document.getElementById("gh-acct");if(e)e.innerHTML=ghCard()}
+async function ghRefresh(){try{GH.user=await tinv("github_account")}catch(e){GH.user=undefined;GH.msg=String(e)}ghPaint()}
+async function ghLogin(){
+ GH.msg="";GH.cancel=false;untoast("tauth");
+ try{const c=await tinv("github_login_start");GH.code=c;ghPaint();tinv("open_url",{url:c.verification_uri}).catch(()=>{});ghPoll(c,c.interval||5,Date.now()+(c.expires_in||900)*1000)}
+ catch(e){const m=String(e);GH.code=null;GH.msg=m.includes("CLIENT_ID_AUSENTE")?"Falta configurar o login do GitHub neste app.\n\n1) Em github.com/settings/developers crie um OAuth App e marque \"Enable Device Flow\".\n2) Cole o Client ID em src-tauri/src/main.rs (GITHUB_CLIENT_ID) e publique uma versão nova.":m;ghPaint()}}
+async function ghPoll(c,iv,deadline){
+ if(GH.cancel||GH.code!==c)return;
+ if(Date.now()>deadline){GH.code=null;GH.msg="O código expirou. Clique em Entrar com GitHub de novo.";return ghPaint()}
+ try{const r=await tinv("github_login_poll",{deviceCode:c.device_code});
+  if(r.status==="ok"){GH.code=null;GH.user=r.login;GS.starred=null;ghPaint();toast("tg","✔ Conectado ao GitHub como @"+esc(r.login),6000);untoast("tauth");vaultWatch();return}
+  if(r.status==="denied"||r.status==="expired"){GH.code=null;GH.msg=r.status==="denied"?"O login foi recusado no GitHub.":"O código expirou. Clique em Entrar com GitHub de novo.";return ghPaint()}
+  if(r.status==="slow_down")iv=(r.interval||iv+5)}
+ catch(e){GH.code=null;GH.msg=String(e);return ghPaint()}
+ setTimeout(()=>ghPoll(c,iv,deadline),iv*1000)}
+document.addEventListener("click",async e=>{
+ if(e.target.closest("[data-gh-go]")){untoast("tauth");f.view="git";render();return ghLogin()}
+ const b=e.target.closest("[data-gh]");if(!b)return;const a=b.dataset.gh;
+ if(a==="x")untoast("tauth");
+ else if(a==="login")ghLogin();
+ else if(a==="cancel"){GH.cancel=true;GH.code=null;GH.msg="Login cancelado.";ghPaint()}
+ else if(a==="open"&&GH.code)tinv("open_url",{url:GH.code.verification_uri}).catch(()=>{});
+ else if(a==="logout"){try{await tinv("github_logout")}catch(x){}GH.user=null;GS.starred=null;ghPaint()}});
 /* ---- avisos: toast, remoto do Git e atualização do app ---- */
 let VWBUSY=false,VWERR="",APPUP=null;
 function toast(id,html,ms){let box=document.getElementById("toasts");if(!box){box=document.createElement("div");box.id="toasts";document.body.appendChild(box)}let t=document.getElementById(id);if(!t){t=document.createElement("div");t.id=id;t.className="toast";box.appendChild(t)}t.innerHTML=html;t.hidden=false;clearTimeout(t._h);if(ms)t._h=setTimeout(()=>{t.hidden=true},ms)}
@@ -848,7 +882,7 @@ async function vaultWatch(force){
   const n=s.behind,txt=n+(n>1?" novos commits":" novo commit"),busy=editorOpen();
   if(GS.auto&&!busy){await gitc("git_pull");await vreload();toast("tv","✔ Vault atualizado: "+txt+" do remoto.",8000);VWERR=""}
   else toast("tv",`⬇ ${txt} no remoto.${busy?" Salve e saia do editor para puxar.":' <button data-vw="pull">Puxar e mesclar</button>'} <button data-vw="x" aria-label="Fechar">×</button>`)
- }catch(e){const m=String(e);if(/conflito/i.test(m)){if(m!==VWERR){VWERR=m;toast("tv","⚠ "+esc(m)+' <button data-vw="x" aria-label="Fechar">×</button>')}}else if(force)toast("tv","Não consegui consultar o remoto: "+esc(m),8000)}
+ }catch(e){const m=String(e);if(authAsk(m)){}else if(/conflito/i.test(m)){if(m!==VWERR){VWERR=m;toast("tv","⚠ "+esc(m)+' <button data-vw="x" aria-label="Fechar">×</button>')}}else if(force)toast("tv","Não consegui consultar o remoto: "+esc(m),8000)}
  finally{VWBUSY=false}}
 async function appUpdateCheck(manual){
  const U=window.__TAURI__&&__TAURI__.updater;if(!U){if(manual)toast("ta","Atualização do app só no app desktop.",5000);return}
@@ -865,7 +899,7 @@ document.addEventListener("click",async e=>{const v=e.target.closest("[data-vw]"
  else if(u){if(u.dataset.up==="x")return untoast("ta");appUpdateInstall()}
  else if(e.target.closest("#chkup")){e.preventDefault();appUpdateCheck(true)}});
 if(window.__TAURI__){let lf=0;window.addEventListener("focus",()=>{if(Date.now()-lf>15000){lf=Date.now();vaultWatch()}});
- setInterval(vaultWatch,60000);setTimeout(vaultWatch,4000);setTimeout(()=>appUpdateCheck(),6000);setInterval(()=>appUpdateCheck(),6*3600*1000);
+ setInterval(vaultWatch,60000);setTimeout(async()=>{await ghRefresh();if(GH.user===null&&ROOTABS&&GS.auto){try{if(await gitc("git_remote"))authAsk("could not read Username")}catch(x){}}vaultWatch()},4000);setTimeout(()=>appUpdateCheck(),6000);setInterval(()=>appUpdateCheck(),6*3600*1000);
  try{__TAURI__.app.getVersion().then(v=>{const el=document.getElementById("appver");if(el)el.textContent="v"+v}).catch(()=>{})}catch(x){}}
 function rec(k,p,n){try{const r=JSON.parse(localStorage.getItem("terricola.recent")||"[]").filter(x=>x.p!==p);r.unshift({k,p,n});localStorage.setItem("terricola.recent",JSON.stringify(r.slice(0,8)))}catch(e){}}
 function home(){
@@ -891,8 +925,8 @@ async function gitv(){
  const out=GS.out?`<div class="pc es" style="margin:10px 0"><div class="mut" style="white-space:pre-wrap">${esc(GS.out)}</div></div>`:"";
  if(err){el.innerHTML=`<div class="hp"><h5>Git</h5><div class="pc es">${/not a git repository/i.test(err)?'<h4>Esta pasta ainda não é um repositório Git</h4><button class="tg on" data-git="init">Iniciar repositório</button>':`<h4>Não consegui ler o Git</h4><div class="mut">${esc(err)}</div>`}${out}</div></div>`;return}
  const L=st.split("\n").filter(Boolean),br=(L[0]||"").replace(/^## /,""),ch=L.slice(1),lab=c=>c.startsWith("??")||c.includes("A")?"novo":c.includes("D")?"removido":"modificado";
- el.innerHTML=`<div class="hp"><h5>GitHub · ${esc(br)}</h5><div class="pc es" style="margin-top:10px"><h4>Repositório remoto</h4><div class="mut">${remote?`Origin: ${esc(remote)}`:"Conecte um repositório GitHub para sincronizar este Vault."}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0"><input id="git-url" type="url" placeholder="https://github.com/usuario/repositorio.git" value="${esc(remote)}" style="flex:1;min-width:240px"><button class="tg on" data-git="remote">Conectar repositório</button>${remote?'<button class="tg" data-git="pull">Puxar e mesclar</button><button class="tg" data-git="sync">Sincronizar pull + push</button>':""}</div><div class="mut">Login seguro pelo Git do sistema: instale GitHub CLI e execute <code>gh auth login</code>. O app não guarda tokens.</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px"><button class="tg" data-git="star">Verificar estrela</button>${GS.starred===false?'<button class="tg on" data-git="openrepo">Dar estrela no GitHub</button>':""}<span id="star-state" class="mut">${GS.starred===true?"Obrigado por apoiar o projeto!":GS.starred===false?"Ainda sem estrela para este repositório.":""}</span></div></div><div class="pc es" style="margin-top:10px"><h4>${ch.length?ch.length+" alterações":"Tudo em dia"}</h4>${ch.slice(0,40).map(l=>`<div class="rv"><span class="p">${esc(l.slice(3))}</span><span class="mut">${lab(l.slice(0,2))}</span></div>`).join("")}<div style="margin-top:10px"><input id="gm" placeholder="Mensagem do commit" value="Atualiza fichas e roteiros" style="width:55%"> <button class="tg on" data-git="commit">Commit</button><button class="tg" data-git="push">Commit e push</button><button class="tg" data-git="refresh">Atualizar</button></div><label class="ck" style="margin-top:10px"><input id="gau" type="checkbox" ${GS.auto?"checked":""}>Automático: commit, push ao salvar e puxar/mesclar atualizações do remoto (checa a cada minuto)</label></div>${out}<h5>Histórico recente</h5><div class="pc es" style="margin-top:10px">${lg.split("\n").filter(Boolean).map(x=>{const[h,d,...m]=x.split("|");return`<div class="rv"><span class="p">${esc(m.join("|"))}</span><span class="mut">${esc(d)} · ${esc(h)}</span></div>`}).join("")||'<span class="mut">Sem commits ainda.</span>'}</div></div>`;
- if(GS.starred===null)gitc("github_star_status").then(s=>{GS.starred=s.starred;const el=$("#star-state");if(el)el.textContent=s.starred?`@${s.username}, obrigado por apoiar!`:`@${s.username}, você ainda não deu estrela.`;if(!s.starred){const b=document.createElement("button");b.className="tg on";b.dataset.git="openrepo";b.textContent="Dar estrela no GitHub";el.before(b)}}).catch(e=>{const el=$("#star-state");if(el)el.textContent=String(e)})}
+ el.innerHTML=`<div class="hp"><h5>GitHub · ${esc(br)}</h5><div class="pc es" id="gh-acct" style="margin-top:10px">${ghCard()}</div><div class="pc es" style="margin-top:10px"><h4>Repositório remoto</h4><div class="mut">${remote?`Origin: ${esc(remote)}`:"Conecte um repositório GitHub para sincronizar este Vault."}</div><div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0"><input id="git-url" type="url" placeholder="https://github.com/usuario/repositorio.git" value="${esc(remote)}" style="flex:1;min-width:240px"><button class="tg on" data-git="remote">Conectar repositório</button>${remote?'<button class="tg" data-git="pull">Puxar e mesclar</button><button class="tg" data-git="sync">Sincronizar pull + push</button>':""}</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:8px"><button class="tg" data-git="star">Verificar estrela</button>${GS.starred===false?'<button class="tg on" data-git="openrepo">Dar estrela no GitHub</button>':""}<span id="star-state" class="mut">${GS.starred===true?"Obrigado por apoiar o projeto!":GS.starred===false?"Ainda sem estrela para este repositório.":""}</span></div></div><div class="pc es" style="margin-top:10px"><h4>${ch.length?ch.length+" alterações":"Tudo em dia"}</h4>${ch.slice(0,40).map(l=>`<div class="rv"><span class="p">${esc(l.slice(3))}</span><span class="mut">${lab(l.slice(0,2))}</span></div>`).join("")}<div style="margin-top:10px"><input id="gm" placeholder="Mensagem do commit" value="Atualiza fichas e roteiros" style="width:55%"> <button class="tg on" data-git="commit">Commit</button><button class="tg" data-git="push">Commit e push</button><button class="tg" data-git="refresh">Atualizar</button></div><label class="ck" style="margin-top:10px"><input id="gau" type="checkbox" ${GS.auto?"checked":""}>Automático: commit, push ao salvar e puxar/mesclar atualizações do remoto (checa a cada minuto)</label></div>${out}<h5>Histórico recente</h5><div class="pc es" style="margin-top:10px">${lg.split("\n").filter(Boolean).map(x=>{const[h,d,...m]=x.split("|");return`<div class="rv"><span class="p">${esc(m.join("|"))}</span><span class="mut">${esc(d)} · ${esc(h)}</span></div>`}).join("")||'<span class="mut">Sem commits ainda.</span>'}</div></div>`;
+ ghRefresh();if(GS.starred===null&&GH.user!==null)gitc("github_star_status").then(s=>{GS.starred=s.starred;const el=$("#star-state");if(el)el.textContent=s.starred?`@${s.username}, obrigado por apoiar!`:`@${s.username}, você ainda não deu estrela.`;if(!s.starred){const b=document.createElement("button");b.className="tg on";b.dataset.git="openrepo";b.textContent="Dar estrela no GitHub";el.before(b)}}).catch(e=>{const el=$("#star-state");if(el)el.textContent=String(e)})}
 $("#view").addEventListener("click",async e=>{const t=e.target.closest("[data-git],[data-nav]");if(!t)return;
  if(t.dataset.nav){f.view=t.dataset.nav;if(f.view==="ficha")f.fo=0;return render()}
  const a=t.dataset.git;GS.out="";
