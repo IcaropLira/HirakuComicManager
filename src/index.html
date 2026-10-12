@@ -114,6 +114,8 @@ label.ck{display:flex;gap:6px;align-items:center;margin:3px 0;color:var(--ink);f
 .nl-body pre{background:var(--bg);border-radius:6px;padding:10px;overflow:auto;font-size:13px}.nl-body hr{border:0;border-top:1px solid var(--ln);margin:16px 0}.nl-body img{max-width:100%;border-radius:6px}
 .nl-li{display:flex;gap:8px;margin:3px 0}.nl-mk{color:var(--acc);min-width:18px;text-align:right}.nl-co{display:flex;gap:10px;background:var(--bg);border-radius:8px;padding:10px 12px;margin:10px 0}
 .nl-rel{border:1px solid var(--ln);border-left:5px solid var(--edge);border-radius:6px;padding:8px 12px;margin:6px 0}.nl-d{color:var(--mut);font-size:13px;margin-top:3px}
+.crumb{cursor:pointer;color:var(--acc)}.crumb:hover{text-decoration:underline}.nl-crumbs{font-size:12px;color:var(--mut);margin-bottom:4px}.nl-crumbs:empty{display:none}
+.nl-child{margin-left:12px;border-left:3px solid var(--ln);padding-left:18px}.nl-child .nl-sec h2{font-size:16px}
 .nl-vers{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}.nl-sheet .wl{cursor:pointer}
 @media print{.bar,aside,nav,header,.app-footer,#toasts{display:none!important}.nl-sheet{box-shadow:none;border:0}}
 .sheet{max-width:780px;margin:0 auto;background:var(--pn);border:1px solid var(--ln);border-radius:4px;padding:22px 26px}
@@ -398,7 +400,7 @@ async function vload(files){
  raw.forEach(r=>{const d=r.path.split("/").slice(0,-1),i=d.findIndex(s=>/^(fichas de personagem|cap[íi]tulos|tramas|locais|roteiros)$/i.test(s));if(i>0)SER.add(d.slice(0,i).join("/"))});
  const notes=raw.map(r=>{const c=vclassify(r.path,SER),name=r.path.split("/").pop().replace(/\.md$/i,"");
   const fm=(r.text.match(/^---\r?\n([\s\S]*?)\r?\n---/)||[])[1]||"",ft=((fm.match(/^(?:tipo|type):\s*["']?([\w-]+)/mi)||[])[1]||"").toLowerCase();
-  return{path:r.path,name,text:r.text,...c,tipo:OV[r.path]||(TIPOS[ft]?ft:c.tipo),links:[],bad:[],back:[]}});
+  return{path:r.path,name,text:r.text,...c,tipo:OV[r.path]||(TIPOS[ft]?ft:c.tipo),_exp:!!(OV[r.path]||TIPOS[ft]),parent:"",links:[],bad:[],back:[]}});
  const map=new Map(notes.map(n=>[n.path,n])),by=new Map(),E=new Map(),bad=new Map();
  notes.forEach(n=>{const k=vkey(n.name);if(!by.has(k))by.set(k,[]);by.get(k).push(n)});
  const dirOf=p=>p.split("/").slice(0,-1).join("/"),RE=/(!?)\[\[([^\]|#^]+)(?:[#^][^\]|]*)?(?:\|[^\]]*)?\]\]/g;
@@ -408,6 +410,11 @@ async function vload(files){
   const x=c.length===1?c[0]:(c.find(y=>dirOf(y.path)===dirOf(n.path))||c[0]);
   if(x===n)continue;n.links.push(x.path);const k=[n.path,x.path].sort().join("\n");E.set(k,(E.get(k)||0)+1)}});
  notes.forEach(n=>[...new Set(n.links)].forEach(p=>{const x=map.get(p);if(!x.back.includes(n.path))x.back.push(n.path)}));
+ /* subpáginas: a nota X.md é pai das notas da pasta X/ (ou, se for "nota de pasta" X/X.md, das demais notas de X/) */
+ const REAL=["personagem","trama","capitulo","roteiro","sub","org","local","outro"];
+ notes.forEach(n=>{const d=n.path.split("/").slice(0,-1);if(d.length<2)return;const dp=d.join("/"),a=map.get(dp+".md"),b=map.get(dp+"/"+d[d.length-1]+".md"),
+  p=a&&a!==n&&REAL.includes(a.tipo)?a:b&&b!==n&&REAL.includes(b.tipo)?b:null;
+  if(p){n.parent=p.path;if(!n._exp&&n.tipo!=="sub")n.tipo="sub"}});
  const groups=[...new Set(notes.filter(n=>n.grupo&&["personagem","grupo","sub"].includes(n.tipo)).map(n=>n.grupo))].sort();
  return{notes,map,by,E,bad,groups}}
 /*ENDCORE*/
@@ -545,7 +552,7 @@ async function vaultDuplicate(path){
 }
 function editar(){
  const E=ED;if(!E){f.view="ficha";return render()}
- if(E.mode==="layout"){$("#view").innerHTML=`<div class="bar"><button class="tg" data-ea="back">← Voltar</button> <b>${esc(E.id)}</b> ${emodes(E)} <span class="mut" id="es">${E.dirty?"alterações não salvas":""}</span>${E.dirty?` <button class="tg on" data-ea="save">${window.__TAURI__?"Salvar no arquivo":"Gerar texto"}</button>`:""}</div>${nlayout(E)}`;$("#view").querySelectorAll("img.bi").forEach(bimg);return}
+ if(E.mode==="layout"){$("#view").innerHTML=`<div class="bar"><button class="tg" data-ea="back">← Voltar</button> ${crumbs(E.path,E.parentPath)}<b>${esc(E.id)}</b> ${emodes(E)} <span class="mut" id="es">${E.dirty?"alterações não salvas":""}</span>${E.dirty?` <button class="tg on" data-ea="save">${window.__TAURI__?"Salvar no arquivo":"Gerar texto"}</button>`:""}</div>${nlayout(E)}`;$("#view").querySelectorAll("img.bi").forEach(bimg);return}
  const rt=["",...Object.keys(RELC)],ta=(a,v,rows)=>`<textarea ${a} rows="${rows}">${esc(v)}</textarea>`;
  const secs=E.secs.map((s,i)=>{const A=`data-s="${i}"`;let b;
   if(s.kind==="campos")b=`<div class="eg">${s.items.map((x,j)=>x.raw!==undefined?`<div class="ef">${ta(`data-ef="raw" ${A} data-i="${j}"`,x.raw.replace(/\s+$/,""),2)}</div>`:`<div class="ef"><input data-ef="k" ${A} data-i="${j}" value="${esc(x.k)}">${ta(`data-ef="v" ${A} data-i="${j}"`,x.v.replace(/^ /,""),Math.max(1,x.v.split("\n").length))}<button class="tg" data-ea="deli" ${A} data-i="${j}">×</button></div>`).join("")}</div><button class="tg" data-ea="addf" ${A}>+ Campo</button>`;
@@ -553,7 +560,7 @@ function editar(){
   else b=`<div class="be" data-be="s${i}"></div>`;
   return`<div class="pc es"><div class="eh"><input class="ht" data-ef="h" ${A} value="${esc(s.h)}"><button class="tg" data-ea="dels" ${A}>remover seção</button></div>${b}</div>`}).join("");
  const props=eprops(E),vr=E.vers.map((v,i)=>`<div class="ef vr"><input data-vf="nome" data-i="${i}" value="${esc(v.nome)}" placeholder="Criança, Jovem, Idoso…"><input data-vf="idade" data-i="${i}" value="${esc(v.idade)}" placeholder="idade" style="max-width:80px"><select data-vf="status" data-i="${i}">${["vivo","falecido","desaparecido"].map(s=>`<option ${s===v.status?"selected":""}>${s}</option>`).join("")}</select><input data-vf="caps" list="dl-k" data-i="${i}" value="${esc(v.caps.join("; "))}" placeholder="capítulos (separe por ;)"><button class="tg" data-ea="delv" data-i="${i}">×</button></div>`).join("");
- $("#view").innerHTML=`<div class="bar"><button class="tg" data-ea="back">← Voltar</button> <b>${esc(E.id)}</b> ${emodes(E)} <span class="mut" id="es">${E.dirty?"alterações não salvas":"sem alterações"}</span> <button class="tg on" data-ea="save">${window.__TAURI__?"Salvar no arquivo":"Gerar texto"}</button> <button class="tg" data-ea="discard">Descartar alterações</button></div>${E.out?`<div class="pc es" style="margin-top:12px"><h4>Texto da ficha (.md)</h4><div class="mut">No navegador não consigo gravar na sua pasta. Copie o texto abaixo e cole no arquivo, ou use o app desktop, que salva direto.</div><textarea readonly rows="12" onfocus="this.select()">${esc(E.out)}</textarea></div>`:""}<div style="padding-top:12px">${props}${E.tipo==="personagem"?`<div class="pc es"><h4>Capa e introdução</h4><div class="be" data-be="pre"></div></div>`:""}${E.tipo==="personagem"?`<div class="pc es"><h4>Versões do personagem</h4>${vr}<button class="tg" data-ea="addv">+ Versão</button></div>`:""}${secs}<div class="es">Nova seção: <button class="tg" data-ea="adds" data-k="campos">Campos</button><button class="tg" data-ea="adds" data-k="texto">Texto</button><button class="tg" data-ea="adds" data-k="rel">Relações</button></div></div><datalist id="dl-c">${C.map(c=>`<option value="${esc(c.id)}">`).join("")}</datalist><datalist id="dl-k">${VT.notes.filter(n=>n.tipo==="capitulo").map(n=>`<option value="${esc(n.name)}">`).join("")}</datalist>`;
+ $("#view").innerHTML=`<div class="bar"><button class="tg" data-ea="back">← Voltar</button> ${crumbs(E.path,E.parentPath)}<b>${esc(E.id)}</b> ${emodes(E)} <span class="mut" id="es">${E.dirty?"alterações não salvas":"sem alterações"}</span> <button class="tg on" data-ea="save">${window.__TAURI__?"Salvar no arquivo":"Gerar texto"}</button> <button class="tg" data-ea="discard">Descartar alterações</button></div>${E.out?`<div class="pc es" style="margin-top:12px"><h4>Texto da ficha (.md)</h4><div class="mut">No navegador não consigo gravar na sua pasta. Copie o texto abaixo e cole no arquivo, ou use o app desktop, que salva direto.</div><textarea readonly rows="12" onfocus="this.select()">${esc(E.out)}</textarea></div>`:""}<div style="padding-top:12px">${props}${E.tipo==="personagem"?`<div class="pc es"><h4>Capa e introdução</h4><div class="be" data-be="pre"></div></div>`:""}${E.tipo==="personagem"?`<div class="pc es"><h4>Versões do personagem</h4>${vr}<button class="tg" data-ea="addv">+ Versão</button></div>`:""}${secs}<div class="es">Nova seção: <button class="tg" data-ea="adds" data-k="campos">Campos</button><button class="tg" data-ea="adds" data-k="texto">Texto</button><button class="tg" data-ea="adds" data-k="rel">Relações</button></div>${subpanel(E.path,E.isNew)}</div><datalist id="dl-c">${C.map(c=>`<option value="${esc(c.id)}">`).join("")}</datalist><datalist id="dl-k">${VT.notes.filter(n=>n.tipo==="capitulo").map(n=>`<option value="${esc(n.name)}">`).join("")}</datalist>`;
 }
 $("#view").addEventListener("input",e=>{const t=e.target,d=t.dataset;if(!ED)return;
  if(d.ef){const s=ED.secs[+d.s],i=+d.i;if(d.ef!=="h")s.dirty=1;
@@ -600,7 +607,7 @@ function lista(tipo){
  const q=(f.lq||"").toLowerCase(),ns=VT.notes.filter(n=>n.tipo===tipo&&n.name.toLowerCase().includes(q)),GR={},SP=vseries();
  ns.forEach(n=>{const k=tipo==="personagem"?n.grupo||"Sem grupo":n.serie||"—";(GR[k]=GR[k]||[]).push(n)});
  const st=n=>fmget(fmof(n),"status")||"sem status",info=n=>tipo==="personagem"?`${n.back.length} citações`:tipo==="trama"?`${st(n)} · ${n.back.filter(p=>VT.map.get(p).tipo==="capitulo").length} caps`:st(n);
- el.innerHTML=`<div class="bar"><input id="lq" type="search" placeholder="Buscar" value="${esc(f.lq||"")}" style="font:inherit;padding:6px 10px;border:1px solid var(--ln);border-radius:6px;background:var(--pn);color:var(--ink);width:240px"> <button class="tg on" data-new="${tipo}">+ ${LN[tipo][1]}</button> <span class="mut">${ns.length} ${LN[tipo][0]}</span></div>${f.nw===tipo?`<div class="pc es" style="margin-top:12px"><h4>${LN[tipo][1]}</h4><input id="nn" placeholder="Nome" style="width:240px"> ${tipo==="personagem"?`<input id="ng" list="dl-g" placeholder="Família ou grupo" style="width:220px"><datalist id="dl-g">${VT.groups.map(g=>`<option value="${esc(g)}">`).join("")}</datalist>`:""} <select id="ns2">${Object.keys(SP).map(s=>`<option>${esc(s)}</option>`).join("")}</select> <button class="tg on" data-ea="mk">Criar</button><div class="mut" id="nm"></div></div>`:""}<div style="padding:14px">${Object.entries(GR).map(([g,l])=>`<h5>${esc(g)} <span class="mut">(${l.length})</span></h5><div class="cards" style="padding:0 0 10px">${l.map(n=>`<div class="card chip" data-eo="${esc(n.path)}"><b>${esc(n.name)}</b><div class="mut">${info(n)}</div><button class="tg lay" data-lo="${esc(n.path)}">👁 Layout</button></div>`).join("")}</div>`).join("")||'<p class="empty">Nada por aqui ainda.</p>'}</div>`;
+ el.innerHTML=`<div class="bar"><input id="lq" type="search" placeholder="Buscar" value="${esc(f.lq||"")}" style="font:inherit;padding:6px 10px;border:1px solid var(--ln);border-radius:6px;background:var(--pn);color:var(--ink);width:240px"> <button class="tg on" data-new="${tipo}">+ ${LN[tipo][1]}</button> <span class="mut">${ns.length} ${LN[tipo][0]}</span></div>${f.nw===tipo?`<div class="pc es" style="margin-top:12px"><h4>${LN[tipo][1]}</h4><input id="nn" placeholder="Nome" style="width:240px"> ${tipo==="personagem"?`<input id="ng" list="dl-g" placeholder="Família ou grupo" style="width:220px"><datalist id="dl-g">${VT.groups.map(g=>`<option value="${esc(g)}">`).join("")}</datalist>`:""} <select id="ns2">${Object.keys(SP).map(s=>`<option>${esc(s)}</option>`).join("")}</select> <button class="tg on" data-ea="mk">Criar</button><div class="mut" id="nm"></div></div>`:""}<div style="padding:14px">${Object.entries(GR).map(([g,l])=>`<h5>${esc(g)} <span class="mut">(${l.length})</span></h5><div class="cards" style="padding:0 0 10px">${l.map(n=>`<div class="card chip" data-eo="${esc(n.path)}"><b>${esc(n.name)}</b><div class="mut">${info(n)}${kids(n.path).length?" · ▤ "+kids(n.path).length:""}</div><button class="tg lay" data-lo="${esc(n.path)}">👁 Layout</button></div>`).join("")}</div>`).join("")||'<p class="empty">Nada por aqui ainda.</p>'}</div>`;
  const i=$("#lq");if(f.lq){i.focus();i.setSelectionRange(i.value.length,i.value.length)}
 }
 function emk(){
@@ -618,7 +625,7 @@ function eprops(E){
  return `<div class="pc es"><h4>Propriedades e vínculos</h4><div>${st}${an}</div><input list="dl-n" data-ea="elk" placeholder="+ Vincular personagem, trama, local ou organização (digite e tecle Enter)" style="width:100%;margin:8px 0"><datalist id="dl-n">${VT.notes.filter(x=>["personagem","trama","org","local"].includes(x.tipo)&&x.path!==E.path).map(x=>`<option value="${esc(x.name)}">`).join("")}</datalist>${Object.entries(g).map(([k,s])=>`<h5>${TIPOS[k][0]}</h5>${[...s].map(p=>`<span class="tag chip" data-eo="${esc(p)}">${esc(VT.map.get(p).name)}</span>`).join("")}`).join("")}</div>`}
 
 /* ---- Layout (visualização de leitura) de fichas, capítulos e tramas ---- */
-const NTIPO={personagem:"Ficha de personagem",trama:"Trama",capitulo:"Capítulo"};
+const NTIPO={personagem:"Ficha de personagem",trama:"Trama",capitulo:"Capítulo",sub:"Subpágina",roteiro:"Roteiro"};
 function nbhtml(md){const B=bparse(md||"",{}),st=[];let o="";
  B.forEach((b,i)=>{while(st.length&&b.ind<=st[st.length-1]){st.pop();o+="</details>"}
   const t=m2h(b.txt||""),ml=b.ind?` style="margin-left:${b.ind*22}px"`:"";
@@ -636,9 +643,8 @@ function nbhtml(md){const B=bparse(md||"",{}),st=[];let o="";
   else if((b.txt||"").trim())o+=`<p>${t}</p>`});
  while(st.length){st.pop();o+="</details>"}return o}
 function nprops(fm){const o=[];(fm||"").split(/\r?\n/).forEach(l=>{const m=l.match(/^([A-Za-zÀ-ú_-]+):[ \t]*(.*)$/);if(m&&!["tipo","versoes","elenco","capitulo","tags"].includes(m[1])&&m[2].trim())o.push([m[1],m[2].replace(/^["']|["']$/g,"").trim()])});return o}
-function nlayout(E){
- const n=VT&&VT.map.get(E.path),br=x=>m2h(x||"").replace(/\n/g,"<br>"),col=(TIPOS[E.tipo]||[])[1]||"var(--acc)";
- const props=nprops(E.fm).map(([k,v])=>`<span class="tag"><b>${esc(k)}</b> ${esc(v.replace(/\[\[|\]\]/g,""))}</span>`).join("")+(n&&n.serie?`<span class="tag"><b>série</b> ${esc(n.serie)}</span>`:"")+(E.tipo==="personagem"&&n&&n.grupo?`<span class="tag"><b>grupo</b> ${esc(n.grupo)}</span>`:"");
+function nlbody(E,n){
+ const br=x=>m2h(x||"").replace(/\n/g,"<br>");
  const pre=(E.pre||"").trim()?`<div class="nl-body">${nbhtml(E.pre)}</div>`:"";
  const vers=E.vers.length?`<section class="nl-sec"><h2>Versões</h2><div class="nl-vers">${E.vers.map((v,i)=>`<div class="vc" style="border-left-color:${VC[i%4]}"><b>${esc(v.nome||"Versão")}</b> ${esc(v.idade)}<br>${v.status==="falecido"?"† falecido":esc(v.status)}${v.caps.length?" · "+v.caps.map(esc).join(", "):""}</div>`).join("")}</div></section>`:"";
  const secs=E.secs.map(s=>{let b="";
@@ -648,9 +654,40 @@ function nlayout(E){
    return`<div class="nl-rel" style="border-left-color:${RELC[ty]||"var(--edge)"}"><span class="wl" data-l="${esc(tg)}">${esc(al||tg)}</span>${ty?` <span class="mut">${esc(ty)}</span>`:""}${x.desc.trim()?`<div class="nl-d">${br(x.desc)}</div>`:""}</div>`}).join("");
   else{const body=s.dirty?s.body:s.raw;b=(body||"").trim()?`<div class="nl-body">${nbhtml(body)}</div>`:""}
   return b?`<section class="nl-sec"><h2>${esc(s.h)}</h2>${b}</section>`:""}).join("");
+ return pre+vers+secs}
+function nlkids(path,depth){if(depth>3)return"";return kids(path).map(k=>{const D=pdoc(k.text);D.path=k.path;D.id=k.name;D.tipo=k.tipo;
+ return`<section class="nl-sec nl-child"><h2>▤ <span class="crumb" data-lo="${esc(k.path)}">${esc(k.name)}</span></h2>${nlbody(D,k)}${nlkids(k.path,depth+1)}</section>`}).join("")}
+function nlayout(E){
+ const n=VT&&VT.map.get(E.path),col=(TIPOS[E.tipo]||[])[1]||"var(--acc)";
+ const props=nprops(E.fm).map(([k,v])=>`<span class="tag"><b>${esc(k)}</b> ${esc(v.replace(/\[\[|\]\]/g,""))}</span>`).join("")+(n&&n.serie?`<span class="tag"><b>série</b> ${esc(n.serie)}</span>`:"")+(E.tipo==="personagem"&&n&&n.grupo?`<span class="tag"><b>grupo</b> ${esc(n.grupo)}</span>`:"");
  const apps=n&&E.tipo!=="capitulo"?n.back.map(p=>VT.map.get(p)).filter(x=>x&&x.tipo==="capitulo"):[];
  const ap=apps.length?`<section class="nl-sec"><h2>Aparece em</h2>${apps.map(x=>`<span class="tag chip" data-lo="${esc(x.path)}">${esc(x.name)}</span>`).join("")}</section>`:"";
- return`<article class="nl-sheet" style="--nlc:${col}"><header><div class="nl-kind">${esc(NTIPO[E.tipo]||E.tipo||"Nota")}</div><h1 class="nl-title">${esc(E.id)}</h1><div>${props}</div></header>${pre}${vers}${secs}${ap}</article>`}
+ return`<article class="nl-sheet" style="--nlc:${col}"><header><div class="nl-crumbs">${crumbs(E.path,E.parentPath)}</div><div class="nl-kind">${esc(NTIPO[E.tipo]||E.tipo||"Nota")}</div><h1 class="nl-title">${esc(E.id)}</h1><div>${props}</div></header>${nlbody(E,n)}${ap}${nlkids(E.path,0)}</article>`}
+/* ---- subpáginas: páginas dentro de páginas (arquivos .md na pasta da página-pai) ---- */
+const kids=p=>VT?VT.notes.filter(x=>x.parent===p).sort((a,b)=>a.name.localeCompare(b.name,"pt-BR")):[];
+function subdir(p){const seg=p.split("/"),base=seg.pop().replace(/\.md$/i,""),d=seg.join("/");return seg[seg.length-1]===base?d:(d?d+"/":"")+base}
+function crumbs(path,fallback){if(!VT)return"";const out=[],seen=new Set();let n=VT.map.get(path),pp=n?n.parent:fallback;
+ while(pp&&!seen.has(pp)){seen.add(pp);const x=VT.map.get(pp);if(!x)break;out.unshift(x);pp=x.parent}
+ return out.map(x=>`<span class="crumb" data-sub-open="${esc(x.path)}">${esc(x.name)}</span> / `).join("")}
+function subpanel(path,unsaved){
+ if(unsaved||!VT||!VT.map.get(path))return`<div class="pc es"><h4>Subpáginas</h4><div class="mut">Salve esta página para poder criar subpáginas dentro dela.</div></div>`;
+ const ks=kids(path);
+ return`<div class="pc es"><h4>Subpáginas <span class="mut">(${ks.length})</span></h4><div>${ks.map(k=>{const c=kids(k.path).length;return`<span class="tag chip" data-sub-open="${esc(k.path)}">▤ ${esc(k.name)}${c?" · "+c:""}</span>`}).join("")||'<span class="mut">Nenhuma ainda.</span>'}</div><div style="margin-top:8px"><input id="sub-name" placeholder="Nome da nova subpágina" style="width:260px"> <button class="tg on" data-sub-new="${esc(path)}">+ Subpágina</button> <span class="mut" id="sub-msg"></span></div></div>`}
+function subnew(parent){
+ const inp=$("#sub-name"),msg=$("#sub-msg"),name=((inp&&inp.value)||"").replace(/[\\/:*?"<>|]/g,"").trim(),say=m=>{if(msg)msg.textContent=m};
+ if(!name)return say("Digite um nome.");
+ if((ED&&f.view==="editar"&&ED.dirty)||(HD&&f.view==="hce"&&HD.dirty))return say("Salve esta página antes de criar uma subpágina.");
+ const path=subdir(parent)+"/"+name+".md";
+ if(VT.map.has(path))return say("Já existe uma subpágina com esse nome aqui.");
+ eopen(path,"---\ntipo: sub\n---\n\n### Notas\n\n","sub");ED.parentPath=parent;render()}
+function subopen(p){
+ if(!VT||!VT.map.get(p))return;
+ if(HD&&f.view==="hce"&&HD.dirty){const m=$("#hs");if(m)m.textContent="Salve ou descarte antes de abrir outra página";return}
+ if(ED&&f.view==="editar"&&ED.mode==="layout")return elayout(p);
+ ego(p)}
+document.addEventListener("click",e=>{const so=e.target.closest("[data-sub-open]");if(so){e.preventDefault();return subopen(so.dataset.subOpen)}
+ const sn=e.target.closest("[data-sub-new]");if(sn)subnew(sn.dataset.subNew)});
+document.addEventListener("keydown",e=>{if(e.target.id==="sub-name"&&e.key==="Enter"){e.preventDefault();const b=document.querySelector("[data-sub-new]");if(b)subnew(b.dataset.subNew)}});
 const emodes=E=>`<span class="mtabs"><button class="tg ${E.mode!=="layout"?"on":""}" data-ea="mode" data-k="edit">✎ Editar</button><button class="tg lay ${E.mode==="layout"?"on":""}" data-ea="mode" data-k="layout">👁 Layout</button></span>`;
 function elayout(p){
  if(ED&&f.view==="editar"&&ED.dirty&&ED.path!==p){const m=$("#es");if(m)m.textContent="Salve ou descarte antes de abrir outra nota";return}
@@ -724,10 +761,11 @@ function hrel(D,A){const{pages,panels}=hmeta(D,A),sp={},unk=new Set(),words=D.B.
 function hce(){
  const D=HD;if(!D){f.view="roteiros";return render()}
  const A=AL(),{pages,panels}=hmeta(D,A),cb=D.B[D.cur],types=[...Object.entries(HT),...BT.filter(x=>!['div','img'].includes(x[0])).map(x=>[x[0],x[2]])];
- const bar=`<div class="bar"><button class="tg" data-ha="back">← Roteiros</button> <b>${esc(D.ch)}</b> <span class="mut" id="hs">${D.dirty?"alterações não salvas":"salvo"}</span> ${[["script","Roteiro"],["layout","Layout"],["rel","Relatório"]].map(([k,l])=>`<button class="tg ${k==="layout"?"lay ":""}${D.tab===k?"on":""}" data-ha="tab" data-k="${k}">${k==="layout"?"👁 ":""}${l}</button>`).join("")}${D.tab==="script"?` <select id="htype">${types.map(([k,v])=>`<option value="${k}" ${cb&&cb.t===k?"selected":""}>${v}</option>`).join("")}</select><button class="tg" data-hm="1" data-ha="b"><b>B</b></button><button class="tg" data-hm="1" data-ha="i"><i>I</i></button><button class="tg" data-ha="pan">+ Painel</button><button class="tg" data-ha="pag">+ Página</button><button class="tg" data-ha="del">Excluir bloco</button>`:""} <button class="tg on" data-ha="save">${window.__TAURI__?"Salvar":"Gerar texto"}</button><button class="tg" data-ha="discard">Descartar</button></div>${D.out?`<div class="pc es" style="margin-top:12px"><h4>Texto do roteiro (.md)</h4><div class="mut">No navegador não consigo gravar na sua pasta. Copie o texto e cole no arquivo, ou use o app desktop.</div><textarea readonly rows="10" onfocus="this.select()">${esc(D.out)}</textarea></div>`:""}`;
+ const bar=`<div class="bar"><button class="tg" data-ha="back">← Roteiros</button> <b>${esc(D.ch)}</b> <span class="mut" id="hs">${D.dirty?"alterações não salvas":"salvo"}</span> ${[["script","Roteiro"],["layout","Layout"],["rel","Relatório"],["sub","▤ Subpáginas"]].map(([k,l])=>`<button class="tg ${k==="layout"?"lay ":""}${D.tab===k?"on":""}" data-ha="tab" data-k="${k}">${k==="layout"?"👁 ":""}${l}</button>`).join("")}${D.tab==="script"?` <select id="htype">${types.map(([k,v])=>`<option value="${k}" ${cb&&cb.t===k?"selected":""}>${v}</option>`).join("")}</select><button class="tg" data-hm="1" data-ha="b"><b>B</b></button><button class="tg" data-hm="1" data-ha="i"><i>I</i></button><button class="tg" data-ha="pan">+ Painel</button><button class="tg" data-ha="pag">+ Página</button><button class="tg" data-ha="del">Excluir bloco</button>`:""} <button class="tg on" data-ha="save">${window.__TAURI__?"Salvar":"Gerar texto"}</button><button class="tg" data-ha="discard">Descartar</button></div>${D.out?`<div class="pc es" style="margin-top:12px"><h4>Texto do roteiro (.md)</h4><div class="mut">No navegador não consigo gravar na sua pasta. Copie o texto e cole no arquivo, ou use o app desktop.</div><textarea readonly rows="10" onfocus="this.select()">${esc(D.out)}</textarea></div>`:""}`;
  let body;
  if(D.tab==="script")body=`<div class="hw"><div class="ho" id="h-outline">${houtline(D,A)}</div><div class="hs"><div class="sheet"><div class="be script-editor" id="hce-be"></div></div><div class="mut" style="text-align:center;margin:10px">Enter cria o próximo bloco · / abre os blocos · arraste ⋮⋮ para reorganizar · Ctrl+Enter cria painel · Ctrl+Shift+Enter cria página</div></div></div><datalist id="dl-who">${Object.keys(A).map(k=>`<option value="${esc(k)}">`).join("")}</datalist>`;
  else if(D.tab==="layout")body=`<div class="hs" style="height:auto"><div class="sheet hl">${hlayout(D)}</div></div>`;
+ else if(D.tab==="sub")body=`<div class="hp">${subpanel(D.path,false)}</div>`;
  else body=hrel(D,A);
  $("#view").innerHTML=bar+body;
  if(D.tab==="script"){
