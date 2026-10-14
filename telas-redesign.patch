@@ -1,0 +1,47 @@
+diff --git a/src/index.html b/src/index.html
+index 4efdcec..7f7c6dd 100644
+--- a/src/index.html
++++ b/src/index.html
+@@ -253,6 +253,24 @@ html[data-footer="0"] .app-footer{display:none}html[data-dates="0"] .np-label sm
+ .sw{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}.sw button{width:24px;height:24px;border-radius:50%;border:2px solid var(--ln);cursor:pointer}.sw button.on{border-color:var(--ink)}.sw input{width:30px;height:26px;padding:0;border:0;background:none;cursor:pointer}
+ @media (max-width:640px){.st-main{grid-template-columns:1fr;grid-template-rows:auto 1fr}.st-rail{flex-direction:row;border-right:0;border-bottom:1px solid var(--ln)}.st-row{flex-direction:column;align-items:flex-start}}
+ @media print{#st{display:none!important}}
++/* ===== Telas: visual unificado ===== */
++*{scrollbar-width:thin;scrollbar-color:color-mix(in srgb,var(--mut) 40%,transparent) transparent}
++.app>#view{background:radial-gradient(55% 30% at 6% 0%,color-mix(in srgb,var(--acc) 10%,transparent),transparent),radial-gradient(45% 30% at 100% 10%,color-mix(in srgb,var(--acc2) 8%,transparent),transparent)}
++.app>aside{background:color-mix(in srgb,var(--pn) 88%,transparent);backdrop-filter:blur(10px)}
++select,.es select,.rv select,#htype{border-radius:10px;border:1px solid var(--ln);background-color:var(--bg)}input[type=range],input[type=checkbox]{accent-color:var(--acc)}
++.vh{position:sticky;top:0;z-index:6;display:flex;align-items:center;gap:12px;padding:12px 18px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--ln)}
++.vh-ic{flex:none;width:36px;height:36px;display:grid;place-items:center;border-radius:11px;font-size:17px;color:var(--acc-ink);background:linear-gradient(135deg,var(--acc),var(--acc2));box-shadow:0 8px 18px -10px var(--acc)}.vh b{display:block;font:700 18px var(--serif)}.vh small{color:var(--mut)}
++.card,.pc{background:color-mix(in srgb,var(--pn) 90%,transparent);backdrop-filter:blur(8px);border-radius:16px}.card{transition:transform .18s,border-color .18s,box-shadow .18s}.card:hover{transform:translateY(-3px);border-color:var(--acc);box-shadow:0 14px 30px -16px var(--acc)}
++.tg,.tag,.chip{border-radius:999px}.tg.on,.tag.on{background:linear-gradient(90deg,var(--acc),var(--acc2));color:var(--acc-ink);border-color:transparent}
++th{color:var(--mut);font-size:11px;letter-spacing:.04em}td{border-color:color-mix(in srgb,var(--ln) 70%,transparent)}tbody tr:hover td{background:color-mix(in srgb,var(--acc) 8%,transparent)}
++tr.sec td{background:color-mix(in srgb,var(--acc) 10%,var(--pn));font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;text-align:left;color:var(--mut)}
++.stop{border-radius:14px;transition:background .15s,box-shadow .15s}.stop:hover{background:color-mix(in srgb,var(--acc) 10%,transparent)}.stop.on{border-color:var(--acc);background:color-mix(in srgb,var(--acc) 14%,var(--pn));box-shadow:0 10px 24px -14px var(--acc)}
++.es textarea,.es input,.es select,.ef input,.ef textarea{border-radius:10px;background:var(--bg);border:1px solid var(--ln)}.es textarea:focus,.es input:focus,.ef input:focus,.ef textarea:focus{outline:2px solid color-mix(in srgb,var(--acc) 55%,transparent);border-color:var(--acc)}
++.ho,.hs,.rv,.op,.oq{border-radius:12px}
++.nl-sheet{border-radius:20px;border:1px solid var(--ln);background:color-mix(in srgb,var(--pn) 92%,transparent);box-shadow:0 24px 50px -32px var(--acc)}.nl-title{font-family:var(--serif)}
++.np-explorer{background:color-mix(in srgb,var(--pn) 88%,transparent);backdrop-filter:blur(10px)}.np-row>button:first-child{border-radius:10px}.np-search{border-radius:999px}
++.np-document{background:radial-gradient(50% 30% at 90% 0%,color-mix(in srgb,var(--acc2) 9%,transparent),transparent)}.np-title{font-size:clamp(28px,4vw,40px)}.np-topline{padding-bottom:10px;border-bottom:1px solid var(--ln)}
++.nvm{background:color-mix(in srgb,var(--pn) 92%,transparent);backdrop-filter:blur(14px);border-radius:14px}.nvm button.on{color:var(--ink);background:color-mix(in srgb,var(--acc) 16%,var(--bg));border-color:transparent;box-shadow:inset 3px 0 0 var(--acc)}
+ /* ===== Tela de Projetos ===== */
+ .pj-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
+ .pj-card{position:relative;display:flex;flex-direction:column;gap:10px;padding:16px;background:color-mix(in srgb,var(--pn) 90%,transparent);backdrop-filter:blur(10px);border:1px solid var(--ln);border-radius:16px;transition:transform .18s,border-color .18s,box-shadow .18s}
+@@ -503,7 +521,7 @@ function render(){
+  updateProjectIdentity();
+  $("#la").textContent=f.from;$("#lb").textContent=f.to;$("#lm").textContent=f.min+" caps";$("#gf").hidden=f.view!=="graph"||!!VT;$("#ga").hidden=f.view!=="graph";layout();
+  document.querySelectorAll("nav button[data-v]").forEach(b=>{const on=b.dataset.v===f.view;b.classList.toggle("on",on);on?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current")});document.querySelectorAll(".nvg").forEach(g=>g.classList.toggle("on",!!g.querySelector("button.on")));
+- ({home,graph:()=>{if(VT){VS.tab="graph";vault()}else graph()},matrix,chaps:cards,timeline,ficha,vault:()=>{if(VT)VS.tab="rev";vault()},git:gitv,editar,fichas:()=>lista("personagem"),tramas:()=>lista("trama"),capitulos:()=>lista("capitulo"),roteiros,hce,pages:notionPages,projects:pjView})[f.view]();detail();bmountAll();navTrack();
++ ({home,graph:()=>{if(VT){VS.tab="graph";vault()}else graph()},matrix,chaps:cards,timeline,ficha,vault:()=>{if(VT)VS.tab="rev";vault()},git:gitv,editar,fichas:()=>lista("personagem"),tramas:()=>lista("trama"),capitulos:()=>lista("capitulo"),roteiros,hce,pages:notionPages,projects:pjView})[f.view]();detail();bmountAll();navTrack();viewHead();
+ }
+ function upd(){f.s=$("#fs").value;f.t=$("#ft").value;f.from=+$("#fa").value;f.to=+$("#fb").value;f.min=+$("#fm").value;f.ns=+$("#ns").value;f.lt=+$("#lt").value;f.rp=+$("#rp").value;f.ld=+$("#ld").value;f.lb=$("#lb").checked;render()}
+ document.querySelectorAll("aside select,aside input:not(#gv)").forEach(e=>e.addEventListener("input",upd));
+@@ -1523,5 +1541,8 @@ document.addEventListener("keydown",e=>{const t=e.target;if(t.id!=="pj-ren")retu
+ function applogo(){return'<svg class="applogo" viewBox="0 0 100 100" aria-hidden="true"><path fill="url(#lgA)" fill-rule="evenodd" d="M50 3C74 3 93 24 93 50S74 97 50 97 7 76 7 50 26 3 50 3ZM50 10C64 10 73 28 73 50S64 90 50 90 27 72 27 50 36 10 50 10Z"/><path style="fill:color-mix(in srgb,var(--acc) 70%,#fff)" d="M50 29Q51.6 48.4 64 50 51.6 51.6 50 71 48.4 51.6 36 50 48.4 48.4 50 29Z"/></svg>'}
+ $("#brand").innerHTML=applogo();
+ document.addEventListener("click",e=>{const x=e.target.closest&&e.target.closest("[data-np-open]");if(!x)return;NPSEL=x.dataset.npOpen;try{localStorage.setItem("terricola.pages.selected",NPSEL)}catch(o){}PROJECT_EDITING=false;f.view="pages";render()},true);
++/* ===== Cabeçalho das telas ===== */
++const VH={matrix:["▦","Matriz","Quem aparece em cada capítulo e trama"],chaps:["▤","Cartões","Capítulos em cartões"],timeline:["⟷","Timeline","Capítulos por publicação ou cronologia"],ficha:["☺","Fichas (visão rápida)","Rede e versões de cada personagem"],fichas:["✎","Fichas","Editor de fichas de personagem"],tramas:["✎","Tramas","Tramas e seus vínculos"],capitulos:["✎","Capítulos","Resumo, elenco e status"],roteiros:["✎","Roteiros","Hiraku Comics Editor"],vault:["▣","Vault","Pasta, classificação e revisão"],git:["⎇","Git","Versões e commits"]};
++function viewHead(){const v=$("#view"),m=VH[f.view];if(!v||!m||v.querySelector(":scope>.vh"))return;v.insertAdjacentHTML("afterbegin",`<div class="vh"><span class="vh-ic">${m[0]}</span><div><b>${m[1]}</b><small>${m[2]}</small></div></div>`)}
+ render();
+ </script></body></html>
