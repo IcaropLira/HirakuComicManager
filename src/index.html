@@ -253,6 +253,19 @@ html[data-footer="0"] .app-footer{display:none}html[data-dates="0"] .np-label sm
 .sw{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}.sw button{width:24px;height:24px;border-radius:50%;border:2px solid var(--ln);cursor:pointer}.sw button.on{border-color:var(--ink)}.sw input{width:30px;height:26px;padding:0;border:0;background:none;cursor:pointer}
 @media (max-width:640px){.st-main{grid-template-columns:1fr;grid-template-rows:auto 1fr}.st-rail{flex-direction:row;border-right:0;border-bottom:1px solid var(--ln)}.st-row{flex-direction:column;align-items:flex-start}}
 @media print{#st{display:none!important}}
+/* ===== Barra de menus, projetos, navegação ===== */
+header.topbar{flex-wrap:wrap;row-gap:8px}
+.menubar{flex:0 0 100%;order:-1;display:flex;gap:2px;margin:-8px -16px 0;padding:2px 10px;background:var(--bg);border-bottom:1px solid var(--ln)}
+.mb .nvt{font:inherit;font-size:12px;color:var(--ink);background:none;border:0;border-radius:6px;padding:3px 10px;cursor:pointer}.mb .nvt:hover,.mb.open .nvt{background:color-mix(in srgb,var(--acc) 15%,transparent)}
+.menubar .nvm{top:100%;margin-top:2px;min-width:260px;max-height:70vh;overflow:auto}
+.mbi{display:flex;align-items:center;gap:20px;width:100%;font:inherit;font-size:13px;color:var(--ink);background:none;border:0;border-radius:7px;padding:6px 10px;text-align:left;cursor:pointer}
+.mbi:hover:not(:disabled){background:color-mix(in srgb,var(--acc) 15%,var(--bg))}.mbi:disabled{opacity:.4;cursor:default}.mbi span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mbi kbd{font:10px system-ui,sans-serif;color:var(--mut)}
+.mbl{padding:6px 10px 2px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}.nvm hr{border:0;border-top:1px solid var(--ln);margin:4px 0;width:100%}
+.ib:disabled{opacity:.35;cursor:default}
+.pj-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}.pj-bar{display:flex;gap:6px;padding:0 18px 8px}
+.pj-list{padding:0 18px;display:flex;flex-direction:column;gap:8px}.pj-row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--pn);border:1px solid var(--ln);border-radius:12px}.pj-row.cur{border-color:var(--acc)}
+.pj-main{flex:1;min-width:0}.pj-main small{display:block;color:var(--mut);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pj-main input{font:inherit;width:100%;box-sizing:border-box}
+.rcw i{margin-left:6px;font-style:normal;opacity:.5}.rcw i:hover{opacity:1;color:var(--acc)}
 /* ===== Escrita: tabelas, callouts, capa ===== */
 .bm-q{width:100%;box-sizing:border-box;margin:2px 0 4px;padding:7px 10px;font:inherit;font-size:12px;color:var(--ink);background:var(--bg);border:1px solid var(--ln);border-radius:8px}.bm-q:focus{outline:2px solid var(--acc)}
 .bm-g{margin:8px 8px 2px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}.bm-tf{max-height:300px;overflow:auto}.bm-grid{max-height:none;overflow:visible}
@@ -286,9 +299,9 @@ html[data-footer="0"] .app-footer{display:none}html[data-dates="0"] .np-label sm
 .ip-cols{display:flex;gap:6px;margin:0 6px 8px}.ip-cols span{width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid transparent}.ip-cols span.on{border-color:var(--ink)}
 </style></head><body>
 <div class="app">
-<header class="topbar"><div class="brand"><button class="brand-mark" id="brand" title="Hiraku Comics Manager · Home" aria-label="Ir para a Home">H</button><div class="brand-txt"><h1 id="app-title">Hiraku Comics Manager</h1><small class="badge">dados de exemplo</small></div></div>
-<nav aria-label="Principal"><button data-v="home">⌂ Home</button><div class="nvg"><button class="nvt" aria-expanded="false">Visualizar<i></i></button><div class="nvm"><button data-v="graph">Grafo</button><button data-v="matrix">Matriz</button><button data-v="chaps">Cartões</button><button data-v="timeline">Timeline</button><button data-v="ficha">Ficha</button></div></div><div class="nvg"><button class="nvt" aria-expanded="false">Escrever<i></i></button><div class="nvm"><button data-v="fichas">Fichas</button><button data-v="tramas">Tramas</button><button data-v="capitulos">Capítulos</button><button data-v="roteiros">Roteiros</button></div></div><button data-v="pages" class="nv-pages">▤ Páginas</button><div class="nvg"><button class="nvt" aria-expanded="false">Projeto<i></i></button><div class="nvm"><button data-v="vault">Vault</button><button data-v="git">⎇ Git</button></div></div></nav>
-<div class="hdr-actions"><button id="sbt" class="ib" hidden>☰ <span>Filtros</span></button><button id="dbt" class="ib" hidden>☷ <span>Detalhes</span></button><button id="th" class="ib" title="Alternar claro/escuro" aria-label="Alternar claro/escuro">◐</button><button id="setbtn" class="ib" title="Configurações (Ctrl+,)" aria-label="Configurações">⚙</button></div></header>
+<header class="topbar"><div class="menubar" role="menubar" aria-label="Menu"><div class="nvg mb"><button class="nvt" aria-expanded="false">Arquivo</button><div class="nvm" data-m="file"></div></div><div class="nvg mb"><button class="nvt" aria-expanded="false">Editar</button><div class="nvm" data-m="edit"></div></div><div class="nvg mb"><button class="nvt" aria-expanded="false">Exibir</button><div class="nvm" data-m="view"></div></div><div class="nvg mb"><button class="nvt" aria-expanded="false">Ir</button><div class="nvm" data-m="go"></div></div><div class="nvg mb"><button class="nvt" aria-expanded="false">Ajuda</button><div class="nvm" data-m="help"></div></div></div><div class="brand"><button class="brand-mark" id="brand" title="Hiraku Comics Manager · Home" aria-label="Ir para a Home">H</button><div class="brand-txt"><h1 id="app-title">Hiraku Comics Manager</h1><small class="badge">dados de exemplo</small></div></div>
+<nav aria-label="Principal"><button data-v="home">⌂ Home</button><div class="nvg"><button class="nvt" aria-expanded="false">Visualizar<i></i></button><div class="nvm"><button data-v="graph">Grafo</button><button data-v="matrix">Matriz</button><button data-v="chaps">Cartões</button><button data-v="timeline">Timeline</button><button data-v="ficha">Ficha</button></div></div><div class="nvg"><button class="nvt" aria-expanded="false">Escrever<i></i></button><div class="nvm"><button data-v="fichas">Fichas</button><button data-v="tramas">Tramas</button><button data-v="capitulos">Capítulos</button><button data-v="roteiros">Roteiros</button></div></div><button data-v="pages" class="nv-pages">▤ Páginas</button><div class="nvg"><button class="nvt" aria-expanded="false">Projeto<i></i></button><div class="nvm"><button data-v="projects">Projetos</button><button data-v="vault">Vault</button><button data-v="git">⎇ Git</button></div></div></nav>
+<div class="hdr-actions"><button id="nvb" class="ib" title="Voltar (Alt+←)" aria-label="Voltar">←</button><button id="nvf" class="ib" title="Avançar (Alt+→)" aria-label="Avançar">→</button><button id="sbt" class="ib" hidden>☰ <span>Filtros</span></button><button id="dbt" class="ib" hidden>☷ <span>Detalhes</span></button><button id="th" class="ib" title="Alternar claro/escuro" aria-label="Alternar claro/escuro">◐</button><button id="setbtn" class="ib" title="Configurações (Ctrl+,)" aria-label="Configurações">⚙</button></div></header>
 <aside>
 <label>Série<select id="fs"></select></label>
 <label>Trama<select id="ft"></select></label>
@@ -455,7 +468,7 @@ function render(){
  updateProjectIdentity();
  $("#la").textContent=f.from;$("#lb").textContent=f.to;$("#lm").textContent=f.min+" caps";$("#gf").hidden=f.view!=="graph"||!!VT;$("#ga").hidden=f.view!=="graph";layout();
  document.querySelectorAll("nav button[data-v]").forEach(b=>{const on=b.dataset.v===f.view;b.classList.toggle("on",on);on?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current")});document.querySelectorAll(".nvg").forEach(g=>g.classList.toggle("on",!!g.querySelector("button.on")));
- ({home,graph:()=>{if(VT){VS.tab="graph";vault()}else graph()},matrix,chaps:cards,timeline,ficha,vault:()=>{if(VT)VS.tab="rev";vault()},git:gitv,editar,fichas:()=>lista("personagem"),tramas:()=>lista("trama"),capitulos:()=>lista("capitulo"),roteiros,hce,pages:notionPages})[f.view]();detail();bmountAll();
+ ({home,graph:()=>{if(VT){VS.tab="graph";vault()}else graph()},matrix,chaps:cards,timeline,ficha,vault:()=>{if(VT)VS.tab="rev";vault()},git:gitv,editar,fichas:()=>lista("personagem"),tramas:()=>lista("trama"),capitulos:()=>lista("capitulo"),roteiros,hce,pages:notionPages,projects:pjView})[f.view]();detail();bmountAll();navTrack();
 }
 function upd(){f.s=$("#fs").value;f.t=$("#ft").value;f.from=+$("#fa").value;f.to=+$("#fb").value;f.min=+$("#fm").value;f.ns=+$("#ns").value;f.lt=+$("#lt").value;f.rp=+$("#rp").value;f.ld=+$("#ld").value;f.lb=$("#lb").checked;render()}
 document.querySelectorAll("aside select,aside input:not(#gv)").forEach(e=>e.addEventListener("input",upd));
@@ -710,11 +723,11 @@ $("#view").addEventListener("click",e=>{if(e.target.closest("[data-lo]"))return;
  else if(d.ea==="dels")E.secs.splice(+d.s,1);
  else if(d.ea==="adds")E.secs.push({h:"Nova seção",kind:d.k,items:[],body:"",raw:"",tail:"\n\n",dirty:1});
  E.dirty=1;render()});
-async function nopen(r0){const T=window.__TAURI__,r=r0||await T.dialog.open({directory:true});if(!r)return;ROOTABS=r;try{localStorage.setItem("terricola.root",r)}catch(x){}
+async function nopen(r0){const T=window.__TAURI__,r=r0||await T.dialog.open({directory:true});if(!r)return;ROOTABS=r;pjAdd(r);try{localStorage.setItem("terricola.root",r)}catch(x){}
  const L=await T.core.invoke("list_md",{root:r});RF=L.map(x=>({name:x.path.split("/").pop(),webkitRelativePath:x.path,_t:x.text,text(){return Promise.resolve(this._t)}}));
  VT=await vload(RF);vapply();VS.sel=null;VS.tab="graph";f.view="home";render()}
 async function cloneRepository(url){if(!window.__TAURI__){alert("A clonagem está disponível no app desktop.");return}if(!url||!url.trim()){alert("Informe o URL do repositório GitHub.");return}const parent=await window.__TAURI__.dialog.open({directory:true,title:"Escolha a pasta onde criar o projeto"});if(!parent)return;try{const root=await window.__TAURI__.core.invoke("git_clone",{parent,url:url.trim()});await nopen(root)}catch(e){alert("Não consegui clonar o repositório. Confira o Git instalado e, se ele for privado, entre com gh auth login.\n\n"+e)}}
-if(window.__TAURI__){let r=null;try{r=localStorage.getItem("terricola.root")}catch(x){}if(r){f.view="home";nopen(r).catch(()=>{})}}
+if(window.__TAURI__){let r=null;try{r=localStorage.getItem("terricola.root")}catch(x){}if(r)pjAdd(r);if(r&&pjStartup()==="last"){f.view="home";nopen(r).catch(()=>{})}else f.view="projects"}
 let LT="personagem";
 const LN={personagem:["fichas","Nova ficha"],trama:["tramas","Nova trama"],capitulo:["capítulos","Novo capítulo"]};
 const TPL={personagem:"### Informações Gerais\n- **Nome completo:** \n- **Idade:** \n- **Profissão:** \n\n---\n### Personalidade e Traços\n- **Traços principais:** \n- **Virtudes:** \n- **Defeitos:** \n\n---\n### História Pessoal\n\n\n---\n### Relações e Conflitos\n",
@@ -1009,7 +1022,7 @@ function home(){
  <h5>Visualizar</h5><div class="cards">${card("graph","◉","Grafo","Notas, personagens e conexões do vault",n.e+" conexões")}${card("matrix","▦","Matriz","Quem aparece em cada capítulo e trama")}${card("timeline","⟷","Timeline","Capítulos por publicação ou cronologia",n.c+" capítulos")}${card("ficha","☺","Fichas (visão rápida)","Rede e versões de cada personagem",n.p+" personagens")}</div>
  <h5>Escrever</h5><div class="cards">${card("fichas","✎","Fichas","Editor de fichas de personagem",n.p)}${card("tramas","✎","Tramas","Tramas e seus vínculos",n.t)}${card("capitulos","✎","Capítulos","Resumo, elenco e status",n.c)}${card("roteiros","✎","Roteiros","Hiraku Comics Editor",n.r+" roteiros")}</div>
  <h5>Projeto</h5><div class="cards">${card("vault","▣","Vault","Pasta, classificação e revisão",n.notas+" notas")}${card("git","⎇","Git","Versões e commits",'<span id="hg"></span>')}</div>
- ${rc.length?`<h5>Continuar de onde parou</h5><div style="padding:8px 18px">${rc.map(r=>`<span class="tag chip" ${r.k==="h"?"data-ho":"data-eo"}="${esc(r.p)}">${esc(r.n)}</span>`).join("")}</div>`:""}</div>`;
+ ${rc.length?`<h5>Continuar de onde parou <button class="np-focusbtn" data-rcact="clear">Limpar histórico</button></h5><div style="padding:8px 18px">${rc.map(r=>`<span class="tag chip rcw" ${r.k==="h"?"data-ho":"data-eo"}="${esc(r.p)}">${esc(r.n)}<i data-rcx="${esc(r.p)}" title="Remover do histórico">×</i></span>`).join("")}</div>`:""}</div>`;
  if(window.__TAURI__&&ROOTABS)gitc("git_status").then(s=>{const k=s.split("\n").filter(l=>l&&!l.startsWith("##")).length,e=$("#hg");if(e&&f.view==="home")e.textContent=k?k+" alterações":"em dia"}).catch(()=>{})}
 async function gitv(){
  const el=$("#view");
@@ -1314,7 +1327,7 @@ $("#gf").addEventListener("click",e=>{const a=e.target.dataset,k=a.all||a.none;i
  document.querySelectorAll(`[data-it^="${k}:"]`).forEach(i=>{i.checked=!!a.all;i.checked?f.hid.delete(i.dataset.it):f.hid.add(i.dataset.it)});render()});
 gfBuild();
 /* ===== Configurações, temas e header ===== */
-const ST_KEY="terricola.settings",ST_DEF={theme:"auto",accent:"",font:"serif",docW:"820",docFs:"15",docLh:"1.6",sort:"recent",dates:"1",focus:"0",footer:"1"};
+const ST_KEY="terricola.settings",ST_DEF={theme:"auto",accent:"",font:"serif",docW:"820",docFs:"15",docLh:"1.6",sort:"recent",dates:"1",focus:"0",footer:"1",startup:"projects"};
 let ST={...ST_DEF};try{const o=JSON.parse(localStorage.getItem(ST_KEY)||"{}");for(const k in ST_DEF)if(typeof o[k]==="string")ST[k]=o[k]}catch(e){}
 const THEMES=[["auto","Automático","linear-gradient(135deg,#f3f1ee 50%,#15141a 50%)","#7a6db0","#a498cf"],["light","Claro","#f3f1ee","#fff","#7a6db0"],["dark","Escuro","#15141a","#1d1c24","#a498cf"],["sepia","Sépia","#f1e8d6","#faf3e3","#9a5b2e"],["sakura","Sakura","#f8f0f2","#fffafb","#c2577f"],["midnight","Meia-noite","#000","#0b0b0f","#b3a7ff"],["ocean","Oceano","#0e1a24","#13232f","#5cb8d6"],["forest","Floresta","#111a15","#17231c","#7cc08f"],["nord","Nord","#2e3440","#3b4252","#88c0d0"],["dracula","Drácula","#282a36","#343746","#bd93f9"],["mocha","Mocha","#1e1e2e","#272739","#f5c2e7"],["sunset","Pôr do sol","#1c1419","#271b22","#ff8a5b"],["solar","Solar","#fdf6e3","#fffaf0","#268bd2"],["lavender","Lavanda","#f1eefb","#fbfaff","#7c5cd6"],["mint","Menta","#eef6f1","#fafffc","#2f9e6e"]];
 const FONTS={serif:'Georgia,"Times New Roman",serif',book:'"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif',sans:'"Segoe UI",system-ui,-apple-system,sans-serif',mono:'ui-monospace,"Cascadia Code",Consolas,monospace'};
@@ -1338,7 +1351,7 @@ function stBody(){
   +strow("Ordenar a lista","",seg("sort",[["recent","Recentes"],["alpha","A–Z"]]))
   +strow("Datas na lista","",seg("dates",[["1","Mostrar"],["0","Ocultar"]]))
   +strow("Modo foco","Esconde a lista de páginas ao editar",seg("focus",[["0","Desligado"],["1","Ligado"]]));
- return strow("Rodapé","",seg("footer",[["1","Visível"],["0","Oculto"]]))
+ return strow("Ao iniciar o app","Só no app desktop",seg("startup",[["projects","Mostrar projetos"],["last","Reabrir último projeto"]]))+strow("Rodapé","",seg("footer",[["1","Visível"],["0","Oculto"]]))
   +strow("Atualizações",($("#appver")||{}).textContent||"",'<button class="np-focusbtn" data-stact="upd">Verificar agora</button>')
   +strow("Restaurar padrões","Volta tema, fontes e opções de Páginas ao original",'<button class="np-focusbtn" data-stact="reset">Restaurar</button>')+'<p class="mut" style="margin-top:16px;font-size:12px">As configurações são salvas automaticamente neste dispositivo. Atalho: Ctrl+, abre este menu.</p>'}
 function stDraw(){const m=$("#st");if(!m||m.hidden)return;m.querySelector(".st-rail").innerHTML=STSEC.map(([k,n])=>`<button data-stsec="${k}" class="${STS===k?"on":""}">${n}</button>`).join("");const b=m.querySelector(".st-body"),y=b.scrollTop;b.innerHTML=stBody();b.scrollTop=y}
@@ -1414,5 +1427,51 @@ document.addEventListener("click",e=>{const t=e.target,c=t.closest("[data-np-cov
   if(o==="addr")R.splice(r+1,0,Array(R[0].length).fill(""));else if(o==="delr"&&R.length>1)R.splice(r,1);else if(o==="addc")R.forEach(x=>x.splice(cc+1,0,""));else if(o==="delc"&&R[0].length>1)R.forEach(x=>x.splice(cc,1));
   brender(el);bsync(S)}
  const ti=t.closest("[data-ti]");if(ti){const el=ti.closest(".be"),n=el&&el.querySelector(`.nb[data-i="${ti.dataset.ti}"]`);if(n)n.scrollIntoView({behavior:"smooth",block:"center"})}});
+/* ===== Navegação (voltar/avançar), projetos e menu ===== */
+const NAV={h:[],i:-1,skip:0},PJ={sel:new Set(),rsel:new Set(),ren:""};
+function navTrack(){if(NAV.skip){NAV.skip=0;navBtn();return}if(f.view==="editar"||f.view==="hce"){navBtn();return}const k=f.view+"|"+(f.view==="pages"?NPSEL:""),c=NAV.h[NAV.i];if(c&&c.k===k){navBtn();return}NAV.h=NAV.h.slice(0,NAV.i+1);NAV.h.push({k,v:f.view,np:NPSEL});if(NAV.h.length>80)NAV.h.shift();NAV.i=NAV.h.length-1;navBtn()}
+function navBtn(){const b=$("#nvb"),n=$("#nvf");if(b)b.disabled=NAV.i<=0&&!["editar","hce"].includes(f.view);if(n)n.disabled=NAV.i>=NAV.h.length-1}
+function navGo(d){const un=["editar","hce"].includes(f.view),j=un&&d<0?NAV.i:NAV.i+d;if(j<0||j>=NAV.h.length)return;const s=NAV.h[j];NAV.i=j;NAV.skip=1;PROJECT_EDITING=false;f.view=s.v;if(s.v==="pages"&&s.np){NPSEL=s.np;try{localStorage.setItem("terricola.pages.selected",s.np)}catch(e){}}render()}
+const navKeep=e=>{if(e.button===3||e.button===4){e.preventDefault();e.stopPropagation()}};
+addEventListener("mousedown",navKeep,true);addEventListener("auxclick",navKeep,true);
+addEventListener("mouseup",e=>{if(e.button===3||e.button===4){navKeep(e);navGo(e.button===3?-1:1)}},true);
+document.addEventListener("keydown",e=>{if(!e.altKey||e.ctrlKey||e.shiftKey||(e.key!=="ArrowLeft"&&e.key!=="ArrowRight"))return;const t=e.target;if(t.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))return;e.preventDefault();navGo(e.key==="ArrowLeft"?-1:1)});
+$("#nvb").onclick=()=>navGo(-1);$("#nvf").onclick=()=>navGo(1);
+/* projetos */
+function pjList(){try{return JSON.parse(localStorage.getItem("terricola.projects")||"[]")}catch(e){return[]}}
+function pjSave(L){try{localStorage.setItem("terricola.projects",JSON.stringify(L.slice(0,30)))}catch(e){}}
+function pjAdd(p){pjSave([{p,t:Date.now()},...pjList().filter(x=>x.p!==p)])}
+function pjName(p){return PROJECT_NAMES[p]||p.split(/[\\/]/).filter(Boolean).pop()||p}
+function pjStartup(){try{return JSON.parse(localStorage.getItem("terricola.settings")||"{}").startup||"projects"}catch(e){return"projects"}}
+function rcGet(){try{return JSON.parse(localStorage.getItem("terricola.recent")||"[]")}catch(e){return[]}}
+function rcSet(a){try{localStorage.setItem("terricola.recent",JSON.stringify(a))}catch(e){}}
+const ago=t=>{const m=(Date.now()-t)/6e4;return m<1?"agora":m<60?Math.round(m)+" min":m<1440?Math.round(m/60)+" h":Math.round(m/1440)+" d"};
+function pjOpen(p){nopen(p).catch(()=>{if(confirm("Não consegui abrir esta pasta. Remover da lista de projetos?")){pjSave(pjList().filter(x=>x.p!==p));render()}})}
+function pjView(){const T=!!window.__TAURI__,L=pjList(),R=rcGet();
+ $("#view").innerHTML=`<div class="hp"><div class="hh"><h2>Projetos</h2><div class="mut">Escolha um projeto para abrir. Remover da lista não apaga nenhum arquivo.</div><div class="pj-act">${T?`<button class="tg on" data-pj="open">Abrir projeto…</button><button class="tg" data-pj="new">Novo projeto…</button><input id="clone-repo-url" type="url" placeholder="URL GitHub do projeto" style="min-width:240px"><button class="tg" data-clone-repo>Clonar</button>`:`<button class="tg on" data-nav="vault">Carregar projeto</button><button class="tg" data-nav="home">Usar dados de exemplo</button>`}</div></div>
+ <h5>Seus projetos</h5>${L.length?`<div class="pj-bar"><button class="np-focusbtn" data-pj="all">Selecionar tudo</button><button class="np-focusbtn" data-pj="rm">Remover selecionados</button><button class="np-focusbtn" data-pj="clear">Limpar lista</button></div><div class="pj-list">${L.map(x=>`<div class="pj-row ${x.p===ROOTABS?"cur":""}"><input type="checkbox" data-pjc="${esc(x.p)}" ${PJ.sel.has(x.p)?"checked":""} aria-label="Selecionar"><div class="pj-main">${PJ.ren===x.p?`<input id="pj-ren" data-pjr="${esc(x.p)}" value="${esc(pjName(x.p))}">`:`<b>${esc(pjName(x.p))}</b>`}<small>${esc(x.p)} · aberto há ${ago(x.t)}</small></div>${x.p===ROOTABS?'<span class="tag">aberto</span>':""}<button class="np-focusbtn" data-pjo="${esc(x.p)}">Abrir</button><button class="np-focusbtn" data-pjn="${esc(x.p)}">Renomear</button><button class="np-focusbtn" data-pjx="${esc(x.p)}">Remover</button></div>`).join("")}</div>`:'<div class="mut" style="padding:8px 18px">Nenhum projeto na lista ainda.</div>'}
+ <h5>Arquivos recentes</h5>${R.length?`<div class="pj-bar"><button class="np-focusbtn" data-rcact="all">Selecionar tudo</button><button class="np-focusbtn" data-rcact="rm">Remover selecionados</button><button class="np-focusbtn" data-rcact="clear">Limpar histórico</button></div><div class="pj-list">${R.map(r=>`<div class="pj-row"><input type="checkbox" data-rcc="${esc(r.p)}" ${PJ.rsel.has(r.p)?"checked":""} aria-label="Selecionar"><div class="pj-main"><b ${r.k==="h"?"data-ho":"data-eo"}="${esc(r.p)}" style="cursor:pointer">${esc(r.n)}</b><small>${r.k==="h"?"Roteiro":"Nota"} · ${esc(r.p)}</small></div><button class="np-focusbtn" data-rcx="${esc(r.p)}">Remover</button></div>`).join("")}</div>`:'<div class="mut" style="padding:8px 18px">Histórico vazio.</div>'}</div>`}
+/* menu de aplicativo */
+function mbItems(m){const it=(a,l,k,d)=>`<button class="mbi" data-mb="${a}" ${d?"disabled":""}><span>${l}</span>${k?`<kbd>${k}</kbd>`:""}</button>`,hr="<hr>",T=!!window.__TAURI__,L=pjList().filter(x=>x.p!==ROOTABS).slice(0,6);
+ if(m==="file")return it("pj-manage","Gerenciar projetos…")+hr+(T?it("pj-open","Abrir projeto…")+it("pj-new","Novo projeto…")+it("pj-clone","Clonar do GitHub…")+hr:"")+(L.length?'<div class="mbl">Projetos recentes</div>'+L.map(x=>`<button class="mbi" data-pjo="${esc(x.p)}"><span>${esc(pjName(x.p))}</span></button>`).join("")+it("pj-clearlist","Limpar projetos recentes")+hr:"")+(ROOTABS?it("pj-close","Fechar projeto"):"")+it("st","Configurações…","Ctrl+,");
+ if(m==="edit")return it("undo","Desfazer","Ctrl+Z")+it("redo","Refazer","Ctrl+Y")+hr+it("cut","Recortar","Ctrl+X")+it("copy","Copiar","Ctrl+C")+it("selall","Selecionar tudo","Ctrl+A")+hr+it("rc-clear","Limpar histórico de arquivos");
+ if(m==="view")return[["home","Home"],["pages","Páginas"],["graph","Grafo"],["matrix","Matriz"],["chaps","Cartões"],["timeline","Timeline"],["roteiros","Roteiros"],["git","Git"]].map(([v,l])=>it("v:"+v,l)).join("")+hr+it("theme","Alternar claro/escuro")+it("focus","Modo foco nas Páginas")+it("st-look","Temas e aparência…");
+ if(m==="go")return it("back","Voltar","Alt+←",NAV.i<=0)+it("fwd","Avançar","Alt+→",NAV.i>=NAV.h.length-1)+hr+it("v:home","Home")+it("v:projects","Projetos");
+ return it("st-keys","Atalhos de teclado")+it("upd","Verificar atualizações")+it("about","Sobre o Hiraku")}
+function mbFill(g){const m=g.querySelector(".nvm");m.innerHTML=mbItems(m.dataset.m)}
+function mbRun(a){const V=v=>{PROJECT_EDITING=false;f.view=v;render()},X={"pj-manage":()=>V("projects"),"pj-open":()=>nopen().catch(()=>{}),"pj-new":()=>nopen().catch(()=>{}),"pj-clone":()=>{V("projects");setTimeout(()=>{const i=$("#clone-repo-url");i&&i.focus()})},"pj-clearlist":()=>{if(confirm("Limpar a lista de projetos recentes?")){pjSave([]);render()}},"pj-close":()=>{try{localStorage.removeItem("terricola.root")}catch(e){}location.reload()},st:()=>stOpen(),undo:()=>document.execCommand("undo"),redo:()=>document.execCommand("redo"),cut:()=>document.execCommand("cut"),copy:()=>document.execCommand("copy"),selall:()=>document.execCommand("selectAll"),"rc-clear":()=>{if(confirm("Limpar o histórico de arquivos recentes?")){rcSet([]);render()}},theme:()=>$("#th").click(),focus:()=>stSet("focus",ST.focus==="1"?"0":"1"),"st-look":()=>{STS="look";stOpen()},"st-keys":()=>{STS="keys";stOpen()},back:()=>navGo(-1),fwd:()=>navGo(1),upd:()=>appUpdateCheck(true),about:()=>alert("Hiraku Comics Manager "+((($("#appver")||{}).textContent)||""))};
+ if(a.startsWith("v:"))V(a.slice(2));else if(X[a])X[a]()}
+document.addEventListener("mousedown",e=>{const t=e.target.closest&&e.target.closest(".menubar button");if(t){e.preventDefault();const g=t.closest(".mb");if(g&&t.classList.contains("nvt"))mbFill(g)}},true);
+document.addEventListener("mouseover",e=>{const t=e.target.closest&&e.target.closest(".mb .nvt");if(!t||!document.querySelector(".mb.open")||t.parentElement.classList.contains("open"))return;const g=t.parentElement;mbFill(g);nvClose();g.classList.add("open");t.setAttribute("aria-expanded","true")});
+document.addEventListener("click",e=>{const t=e.target,g=s=>t.closest&&t.closest(s);let x;
+ if(x=g("[data-rcx]")){e.stopPropagation();e.preventDefault();PJ.rsel.delete(x.dataset.rcx);rcSet(rcGet().filter(r=>r.p!==x.dataset.rcx));return render()}
+ if(x=g("[data-rcact]")){const o=x.dataset.rcact;if(o==="all")PJ.rsel=new Set(rcGet().map(r=>r.p));else if(o==="rm"&&PJ.rsel.size&&confirm("Remover "+PJ.rsel.size+" item(ns) do histórico?")){rcSet(rcGet().filter(r=>!PJ.rsel.has(r.p)));PJ.rsel.clear()}else if(o==="clear"&&confirm("Limpar todo o histórico de arquivos recentes?")){rcSet([]);PJ.rsel.clear()}return render()}
+ if(x=g("[data-pj]")){const o=x.dataset.pj;if(o==="open"||o==="new")return nopen().catch(()=>{});if(o==="all")PJ.sel=new Set(pjList().map(p=>p.p));else if(o==="rm"&&PJ.sel.size&&confirm("Remover "+PJ.sel.size+" projeto(s) da lista? Os arquivos não serão apagados.")){pjSave(pjList().filter(p=>!PJ.sel.has(p.p)));PJ.sel.clear()}else if(o==="clear"&&confirm("Limpar toda a lista de projetos? Os arquivos não serão apagados.")){pjSave([]);PJ.sel.clear()}return render()}
+ if(x=g("[data-pjo]"))return pjOpen(x.dataset.pjo);
+ if(x=g("[data-pjn]")){PJ.ren=x.dataset.pjn;render();return setTimeout(()=>{const i=$("#pj-ren");i&&(i.focus(),i.select())})}
+ if(x=g("[data-pjx]")){PJ.sel.delete(x.dataset.pjx);pjSave(pjList().filter(p=>p.p!==x.dataset.pjx));return render()}
+ if(x=g("[data-mb]"))mbRun(x.dataset.mb)},true);
+document.addEventListener("change",e=>{const t=e.target;if(t.dataset&&t.dataset.pjc!==undefined)t.checked?PJ.sel.add(t.dataset.pjc):PJ.sel.delete(t.dataset.pjc);if(t.dataset&&t.dataset.rcc!==undefined)t.checked?PJ.rsel.add(t.dataset.rcc):PJ.rsel.delete(t.dataset.rcc)});
+document.addEventListener("keydown",e=>{const t=e.target;if(t.id!=="pj-ren")return;if(e.key==="Enter"){const n=t.value.trim();if(n){PROJECT_NAMES[t.dataset.pjr]=n;try{localStorage.setItem("terricola.projectNames",JSON.stringify(PROJECT_NAMES))}catch(x){}}PJ.ren="";render()}else if(e.key==="Escape"){e.stopPropagation();PJ.ren="";render()}});
 render();
 </script></body></html>
